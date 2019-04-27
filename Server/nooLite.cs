@@ -98,7 +98,6 @@ namespace SmartHome
 
         private const int BufferSize = 17;
         public static List<byte[]> Incoming;
-
         private static SerialPort _serial;
         private static byte _modeMtrf64;
         public static String PortMtrf64;
@@ -114,7 +113,7 @@ namespace SmartHome
         {
             _serial = new SerialPort();
             Incoming = new List<byte[]>();
-            _modeMtrf64 = (byte)Mode.Txf;
+            _modeMtrf64 = (byte) Mode.Txf;
             PortMtrf64 = FindPortMtrf();
             if (PortMtrf64.Length == 0)
             {
@@ -173,7 +172,6 @@ namespace SmartHome
             string[] portnames = SerialPort.GetPortNames();
             foreach (var portname in portnames)
             {
- if (portname == "COM1") continue;
                 _serial.PortName = portname;
                 try
                 {
@@ -189,8 +187,8 @@ namespace SmartHome
                         if (stopWatch.Elapsed.Milliseconds > 500) break;
                     }
                     stopWatch.Stop();
-                    if (_serial.BytesToRead < BufferSize) continue;
-                    for (int i = 0; i < bufferRx.Length; i++) bufferRx[i] = (byte)_serial.ReadByte();
+                    if (_serial.BytesToRead == BufferSize)
+                        for (int i = 0; i < bufferRx.Length; i++) bufferRx[i] = (byte)_serial.ReadByte();
                     _serial.Close();
                     if ((bufferRx[(byte)Rx.St] == 173) && (bufferRx[(byte)Rx.Sp] == 174) &&
                         (bufferRx[(byte)Rx.Crc] == GetBufferCrc(bufferRx))) return portname;
@@ -301,25 +299,25 @@ namespace SmartHome
             while (Incoming.Count > 1)
             {
                 if (IniFile.NooLiteLogEnable) BufferToLog(Incoming[0]);
-                if (Incoming[0][(byte) Rx.Cmd] == (byte) Command.SendState)
+                if (Incoming[0][(byte)Rx.Cmd] == (byte)Command.SendState)
                 {
                     foreach (var device in Devices.DevicesList)
                     {
                         if (device.Type != (byte)Devices.DeviceType.NooLite) continue;
                         String addr = Incoming[0][(byte) Tx.Id0].ToString("X2") +
-                            Incoming[0][(byte) Tx.Id1].ToString("X2") +
-                            Incoming[0][(byte) Tx.Id2].ToString("X2") +
-                            Incoming[0][(byte) Tx.Id3].ToString("X2");
+                            Incoming[0][(byte)Tx.Id1].ToString("X2") +
+                            Incoming[0][(byte)Tx.Id2].ToString("X2") +
+                            Incoming[0][(byte)Tx.Id3].ToString("X2");
                         if (device.Addr != addr) continue;
                         int state = 0;
-                        if ((Incoming[0][(byte) Rx.Fmt] == 0) && (Incoming[0][(byte) Rx.D2] > 0)) state = 1;
+                        if ((Incoming[0][(byte)Rx.Fmt] == 0) && (Incoming[0][(byte)Rx.D2] > 0)) state = 1;
                         Devices.SetState(device, state);
                         break;
                     }
                 }
                 else
                 {
-                    Sensors.SaveToDatabase ("@" + Incoming[0][(byte) Rx.Ch].ToString(), Incoming[0][(byte) Rx.Cmd].ToString());
+                    Sensors.SaveToDatabase ("@" + Incoming[0][(byte)Rx.Ch].ToString(), Incoming[0][(byte)Rx.Cmd].ToString());
                 }
                 Incoming.RemoveAt(0);
             }

@@ -34,10 +34,12 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Bin\</OutputPath>
+    <OutputPath>..\..\Bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,6 +52,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>SmartHome.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SmartHome.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.3.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
@@ -290,7 +295,7 @@
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 и x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
