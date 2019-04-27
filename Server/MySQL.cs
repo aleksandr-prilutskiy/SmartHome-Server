@@ -8,11 +8,12 @@ using SmartHome.Properties;
 
 namespace SmartHome
 {
-    // Объект для работы с базой данных MySQL
+    // Объект для работы с базой данных MySQL TEST
     class MySql
     {
         public static MySqlConnection Connection;
         private static bool _busy;
+        private int i2;
 
 //===============================================================================================================
 // Name...........:	MySql
@@ -21,6 +22,7 @@ namespace SmartHome
 //===============================================================================================================
         public MySql()
         {
+            i2 = 1;
             Connection = null;
             string connectionString = "server=" + IniFile.DatabaseAddress +
                 ";port=" + IniFile.DatabasePort.ToString() +
