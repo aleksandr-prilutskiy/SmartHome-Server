@@ -22,7 +22,7 @@ namespace SmartHome
 
         private static string[] Expressions = { // Список обрабатываемых выражений
             "device", "sensor"
-        };
+        }; // string[] Expressions
 
         public class Event              // Запись о событии
         {
@@ -131,7 +131,12 @@ namespace SmartHome
                 newevent.Command = record[3];
                 newevent.Device = record[4];
                 newevent.Parameters = record[5];
-                if (IniFile.EventsLogEnable) LogFile.Add("Event: " + newevent.Application + " " + newevent.Command + " " + newevent.Device + " " + newevent.Parameters);
+                if (IniFile.EventsLogEnable)
+                    LogFile.Add("Event: " +
+                        newevent.Application + " " +
+                        newevent.Command + " " +
+                        newevent.Device + " " +
+                        newevent.Parameters);
                 HandleEvent(newevent);
             }
         } // void ChekEvents()
@@ -146,7 +151,12 @@ namespace SmartHome
             foreach (var shedule in SheduleList)
             {
                 if ((shedule.NextTime == DateTime.MinValue) || (shedule.NextTime > DateTime.Now)) continue;
-                if (IniFile.EventsLogEnable) LogFile.Add("Shedule event: " + shedule.Application + " " + shedule.Command + " " + shedule.Device + " " + shedule.Parameters);
+                if (IniFile.EventsLogEnable)
+                    LogFile.Add("Shedule event: " +
+                        shedule.Application + " " +
+                        shedule.Command + " " +
+                        shedule.Device + " " +
+                        shedule.Parameters);
                 HandleEvent(shedule);
                 switch (shedule.Mode)
                 {
@@ -173,7 +183,8 @@ namespace SmartHome
                         break;
                 }
                 String nextime = shedule.NextTime != DateTime.MinValue 
-                    ? "'" + shedule.NextTime.ToString("yyyy-MM-dd hh:mm:ss") + "'" : "NULL";
+                    ? "'" + shedule.NextTime.ToString("yyyy-MM-dd hh:mm:ss") + "'"
+                    : "NULL";
                 MySql.SaveTo("shedule", "next_time", nextime, "id = '" + shedule.Id + "'");
             }
         } //  ChekShedule()
@@ -193,7 +204,12 @@ namespace SmartHome
                     if (DateTime.Now < script.Timer) continue;
                 if (script.Rules.IndexOf("sensor(" + sensor.Topic + ")", StringComparison.Ordinal) < 0) continue;
                 if (!ChekLexeme(ReplaceExpressions(script.Rules))) continue;
-                if (IniFile.EventsLogEnable) LogFile.Add("Script event: " + script.Application + " " + script.Command + " " + script.Device + " " + script.Parameters);
+                if (IniFile.EventsLogEnable)
+                    LogFile.Add("Script event: " +
+                        script.Application + " " +
+                        script.Command + " " +
+                        script.Device + " " +
+                        script.Parameters);
                 HandleEvent(script);
                 script.Timer = DateTime.Now.AddSeconds(script.Timeout);
             }
@@ -207,47 +223,52 @@ namespace SmartHome
         public static void HandleEvent(Event newevent)
         {
             bool status = false;
-            if (newevent.Application == "@")
+            switch (newevent.Application)
             {
-                if (newevent.Command == "reload")
-                {
-                    if (newevent.Parameters == "devices")
+                case "@":
+                    switch (newevent.Command)
                     {
-                        Program.AppWindow.GridViewDevices.Rows.Clear();
-                        Devices.DevicesList.Clear();
-                        Devices.LoadTable();
+                        case "reload":
+                            switch (newevent.Parameters)
+                            {
+                                case "devices":
+                                    Program.AppWindow.GridViewDevices.Rows.Clear();
+                                    Devices.DevicesList.Clear();
+                                    Devices.LoadTable();
+                                    break;
+                                case "sensors":
+                                    Program.AppWindow.GridViewSensors.Rows.Clear();
+                                    Sensors.SensorsList.Clear();
+                                    Sensors.LoadTable();
+                                    break;
+                                case "shedule":
+                                    Program.AppWindow.timerEvents.Enabled = false;
+                                    SheduleList.Clear();
+                                    LoadShedule();
+                                    Program.AppWindow.timerEvents.Enabled = true;
+                                    break;
+                                case "scripts":
+                                    Program.AppWindow.timerEvents.Enabled = false;
+                                    ScriptsList.Clear();
+                                    LoadScripts();
+                                    Program.AppWindow.timerEvents.Enabled = true;
+                                    break;
+                            }
+                            status = true;
+                            break;
+                        case "turn off all":
+                            Devices.TurnOffAll();
+                            break;
                     }
-                    if (newevent.Parameters == "sensors")
-                    {
-                        Program.AppWindow.GridViewSensors.Rows.Clear();
-                        Sensors.SensorsList.Clear();
-                        Sensors.LoadTable();
-                    }
-                    if (newevent.Parameters == "shedule")
-                    {
-                        Program.AppWindow.timerEvents.Enabled = false;
-                        SheduleList.Clear();
-                        LoadShedule();
-                        Program.AppWindow.timerEvents.Enabled = true;
-                    }
-                    if (newevent.Parameters == "scripts")
-                    {
-                        Program.AppWindow.timerEvents.Enabled = false;
-                        ScriptsList.Clear();
-                        LoadScripts();
-                        Program.AppWindow.timerEvents.Enabled = true;
-                    }
-                    status = true;
-                }
-            }
-            else if (newevent.Application == "nooLite")
-            {
-                var device = Devices.Find(newevent.Device);
-                if (device != null) status = nooLite.SendCommand(device.Channel, newevent.Command, newevent.Parameters);
-            }
-            else
-            {
-                status = ExecuteFile(newevent);
+                    break;
+                case "nooLite":
+                    var device = Devices.Find(newevent.Device);
+                    if (device != null)
+                        status = nooLite.SendCommand(device.Channel, newevent.Command, newevent.Parameters);
+                    break;
+                default:
+                    status = ExecuteFile(newevent);
+                    break;
             }
             MySql.SaveTo("events", "status", status.ToString(), "id = '" + newevent.Id + "'");
         } // void HandleEvent(newevent)
@@ -272,11 +293,11 @@ namespace SmartHome
             iStartProcess.StartInfo.FileName = exeFile;
             iStartProcess.StartInfo.Arguments = "";
             if (newevent.Command.Length > 0)
-                iStartProcess.StartInfo.Arguments = iStartProcess.StartInfo.Arguments + " " + newevent.Command;
+                iStartProcess.StartInfo.Arguments += " " + newevent.Command;
             if (newevent.Device.Length > 0)
-                iStartProcess.StartInfo.Arguments = iStartProcess.StartInfo.Arguments + " " + newevent.Device;
+                iStartProcess.StartInfo.Arguments += " " + newevent.Device;
             if (newevent.Parameters.Length > 0)
-                iStartProcess.StartInfo.Arguments = iStartProcess.StartInfo.Arguments + " " + ReplaceExpressions(newevent.Parameters);
+                iStartProcess.StartInfo.Arguments += " " + ReplaceExpressions(newevent.Parameters);
             if (iStartProcess.Start()) return true;
             return false;
         } // bool ExecuteFile(newevent)
@@ -310,7 +331,8 @@ namespace SmartHome
                     if (sensor != null) identifier = sensor.Value;
                 }
                 if (identifier.Length > 0)
-                    return ReplaceExpressions(source.Substring(0, namepos) + identifier + source.Substring(namepos + expression.Length + namelen + 2));
+                    return ReplaceExpressions(source.Substring(0, namepos) + identifier +
+                        source.Substring(namepos + expression.Length + namelen + 2));
             }
             return source;
         } // String ReplaceExpressions(String source)

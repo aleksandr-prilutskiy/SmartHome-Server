@@ -122,34 +122,24 @@ namespace SmartHome
         {
             MySql.SaveTo("sensors_data", "sensor,value,status", "'" + sensor.Topic + "','" + sensor.Value + "','0'");
             MySql.SaveTo("sensors", "value", sensor.Value, "topic = '" + sensor.Topic + "'");
-            //for (int i = 0; i < _appWindow.GridViewSensors.Rows.Count; i++)
-            //{
-                //if (_appWindow.GridViewSensors[1, i].Value.ToString() != sensor.Topic) continue;
-                //_appWindow.GridViewSensors[2, i].Value = sensor.Value;
-                //_appWindow.GridViewSensors[3, i].Value = DateTime.Now.ToString("HH:mm:ss");
-                //break;
-            //}
             Program.AppWindow.GridViewSensors[2, sensor.InList].Value = sensor.Value;
             Program.AppWindow.GridViewSensors[3, sensor.InList].Value = DateTime.Now.ToString("HH:mm:ss");
             Events.ChekScripts(sensor);
         } // void SaveToDatabase(sensor)
 
-        //===============================================================================================================
-        // Name...........:	MqttConnect
-        // Description....:	Подключение к брокеру MQTT
-        // Syntax.........:	MqttConnect()
-        //===============================================================================================================
+//===============================================================================================================
+// Name...........:	MqttConnect
+// Description....:	Подключение к брокеру MQTT
+// Syntax.........:	MqttConnect()
+//===============================================================================================================
         public static void MqttConnect()
         {
             ClientMqtt = null;
             if (MqttBrokerAddress == "") return;
             try
             {
-                ClientMqtt = new MqttClient(MqttBrokerAddress, MqttBrokerPort, false, null);
+                ClientMqtt = new MqttClient(MqttBrokerAddress);//, MqttBrokerPort, false, null);
                 ClientMqtt.MqttMsgPublishReceived += MqttMsgPublishReceived;
-                //_client.MqttMsgPublished += client_MqttMsgPublished;
-                //_client.MqttMsgSubscribed += client_MqttMsgSubscribed;
-                //_client.MqttMsgUnsubscribed += client_MqttMsgUnsubscribed;
                 string clientId = "MQTT Client: " + Guid.NewGuid().ToString("N");
                 ClientMqtt.Connect(clientId, MqttUserName, MqttPassword);
             }
@@ -161,7 +151,8 @@ namespace SmartHome
             {
                 MqttSubscribeToAll();
                 Program.AppWindow.pictureBoxConnectMQTT.Image = Resources.green;
-                LogFile.Add("Установлено подключение к брокеру MQTT: " + MqttBrokerAddress + ":" + MqttBrokerPort.ToString());
+                LogFile.Add("Установлено подключение к брокеру MQTT: " +
+                    MqttBrokerAddress + ":" + MqttBrokerPort.ToString());
             }
             else
             {

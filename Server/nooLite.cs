@@ -187,7 +187,7 @@ namespace SmartHome
                         if (stopWatch.Elapsed.Milliseconds > 500) break;
                     }
                     stopWatch.Stop();
-                    if (_serial.BytesToRead == BufferSize)
+                    if (_serial.BytesToRead >= BufferSize)
                         for (int i = 0; i < bufferRx.Length; i++) bufferRx[i] = (byte)_serial.ReadByte();
                     _serial.Close();
                     if ((bufferRx[(byte)Rx.St] == 173) && (bufferRx[(byte)Rx.Sp] == 174) &&
@@ -231,42 +231,42 @@ namespace SmartHome
             for (int i = 0; i < bufferTx.Length; i++) bufferTx[i] = 0;
             bufferTx[(byte)Tx.St] = 171;
             bufferTx[(byte)Tx.Mode] = _modeMtrf64;
-            bufferTx[(byte)Tx.Ch] = (byte) channel;
+            bufferTx[(byte)Tx.Ch] = (byte)channel;
             switch (command)
             {
                 case "off":
-                    bufferTx[(byte) Tx.Cmd] = (byte) Command.Off;
+                    bufferTx[(byte)Tx.Cmd] = (byte)Command.Off;
                     break;
                 case "on":
-                    bufferTx[(byte) Tx.Cmd] = (byte) Command.On;
+                    bufferTx[(byte)Tx.Cmd] = (byte)Command.On;
                     break;
                 case "switch":
-                    bufferTx[(byte) Tx.Cmd] = (byte) Command.Switch;
+                    bufferTx[(byte)Tx.Cmd] = (byte)Command.Switch;
                     break;
                 case "temporary_on":
-                    bufferTx[(byte) Tx.Cmd] = (byte) Command.TemporaryOn;
+                    bufferTx[(byte)Tx.Cmd] = (byte)Command.TemporaryOn;
                     int data;
                     if (!int.TryParse(parameters, out data)) data = 0;
-                    data = (int) Math.Ceiling(d: data / 5);
+                    data = (int)Math.Ceiling(d: data / 5);
                     if (data < 1) data = 1;
                     if (data < 256)
                     {
-                        bufferTx[(byte) Tx.Fmt] = 5;
-                        bufferTx[(byte) Tx.D0] = (byte) data;
+                        bufferTx[(byte)Tx.Fmt] = 5;
+                        bufferTx[(byte)Tx.D0] = (byte)data;
                     }
                     else
                     {
-                        bufferTx[(byte) Tx.Fmt] = 6;
-                        bufferTx[(byte) Tx.D0] = (byte) (data & 0x00FF);
-                        bufferTx[(byte) Tx.D1] = (byte) ((int) Math.Floor(d: (decimal) (data / 256)) & 0x00FF);
+                        bufferTx[(byte)Tx.Fmt] = 6;
+                        bufferTx[(byte)Tx.D0] = (byte)(data & 0x00FF);
+                        bufferTx[(byte)Tx.D1] = (byte)((int)Math.Floor(d: (decimal)(data / 256)) & 0x00FF);
                     }
                     break;
                 case "readstate":
                     bufferTx[(byte) Tx.Cmd] = (byte) Command.ReadState;
                     break;
             }
-            bufferTx[(byte) Tx.Crc] = GetBufferCrc(bufferTx);
-            bufferTx[(byte) Tx.Sp] = 172;
+            bufferTx[(byte)Tx.Crc] = GetBufferCrc(bufferTx);
+            bufferTx[(byte)Tx.Sp] = 172;
             if (IniFile.NooLiteLogEnable) BufferToLog(bufferTx);
             _serial.Write(bufferTx, 0, bufferTx.Length);
             return true;
@@ -330,8 +330,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void Close()
         {
-            if (!_serial.IsOpen) return;
-            _serial.Close();
+            if (_serial.IsOpen) _serial.Close();
         } // void Close()
 
 //===============================================================================================================
@@ -365,12 +364,22 @@ namespace SmartHome
                 LogFile.Add(s);
                 return;
             }
-            s += buffer[(byte)Tx.St].ToString() + " |MODE=" + buffer[(byte)Tx.Mode].ToString() + "|CTR=" + buffer[(byte)Tx.Ctr].ToString() + "|";
+            s += buffer[(byte)Tx.St].ToString() +
+                " |MODE=" + buffer[(byte)Tx.Mode].ToString() + 
+                "|CTR=" + buffer[(byte)Tx.Ctr].ToString() + "|";
             if (buffer[(byte)Tx.St] == 171) s += "RES=" + buffer[(byte)Tx.Res].ToString() + "|";
             if (buffer[(byte)Tx.St] == 173) s += "TOGL=" + buffer[(byte)Tx.Res].ToString() + "|";
-            s += "CH=" + buffer[(byte)Tx.Ch].ToString() + "|CMD=" + buffer[(byte)Tx.Cmd].ToString() + "|FMT=" + buffer[(byte)Tx.Fmt].ToString() + " |";
-            s += "D=" + buffer[(byte)Tx.D0].ToString() + " " + buffer[(byte)Tx.D1].ToString() + " " + buffer[(byte)Tx.D2].ToString() + " " + buffer[(byte)Tx.D3].ToString() + "|";
-            s += "ID=" + buffer[(byte)Tx.Id0].ToString("X2") + buffer[(byte)Tx.Id1].ToString("X2") + buffer[(byte)Tx.Id2].ToString("X2") + buffer[(byte)Tx.Id3].ToString("X2") + "|";
+            s += "CH=" + buffer[(byte)Tx.Ch].ToString() +
+                "|CMD=" + buffer[(byte)Tx.Cmd].ToString() +
+                "|FMT=" + buffer[(byte)Tx.Fmt].ToString() + " |";
+            s += "D=" + buffer[(byte)Tx.D0].ToString() + " " +
+                buffer[(byte)Tx.D1].ToString() + " " + 
+                buffer[(byte)Tx.D2].ToString() + " " + 
+                buffer[(byte)Tx.D3].ToString() + "|";
+            s += "ID=" + buffer[(byte)Tx.Id0].ToString("X2") +
+                buffer[(byte)Tx.Id1].ToString("X2") +
+                buffer[(byte)Tx.Id2].ToString("X2") +
+                buffer[(byte)Tx.Id3].ToString("X2") + "|";
             s += "CRC=" + buffer[(byte)Tx.Crc].ToString() + "|" + buffer[(byte)Tx.Sp].ToString() + "|";
             LogFile.Add(s);
         } // void BufferToLog(Byte[])

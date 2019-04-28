@@ -11,7 +11,7 @@ namespace SmartHome
     // Объект для работы с файлом журнала работы программы
     class LogFile
     {
-        private const string LogFileName = "Logs\\SmartHomeServer.log"; // Имя файла журнала
+        private const string LogFileName = "SmartHomeServer.log"; // Имя файла журнала
         private static string _fileName;
         private static List<String> _buffer;
         private static bool _busy;
@@ -24,7 +24,9 @@ namespace SmartHome
         public LogFile()
         {
             _buffer = new List<String>();
-            _fileName = AppDomain.CurrentDomain.BaseDirectory + LogFileName;
+            String path = AppDomain.CurrentDomain.BaseDirectory + "Logs";
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            _fileName = path + "//" + LogFileName;
             StreamWriter stream = null;
             try
             {

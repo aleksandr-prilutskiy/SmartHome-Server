@@ -34,7 +34,7 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                MessageBox.Show(Resources.DatabaseConnectError, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogFile.Add(Resources.DatabaseConnectError);
                 Connection = null;
             }
             if (Connection != null)
@@ -69,7 +69,8 @@ namespace SmartHome
                                 Sensors.MqttBrokerAddress = (string)readData[2];
                                 break;
                             case "MQTT_Port":
-                                if (!int.TryParse(readData[2].ToString(), out Sensors.MqttBrokerPort)) Sensors.MqttBrokerPort = 1883;
+                                if (!int.TryParse(readData[2].ToString(), out Sensors.MqttBrokerPort))
+                                    Sensors.MqttBrokerPort = 1883;
                                 break;
                             case "MQTT_User":
                                 Sensors.MqttUserName = (string)readData[2];
@@ -142,7 +143,7 @@ namespace SmartHome
 // Return value(s):	Success:    - коллекцию массивов строк, содержащую данные из таблицы в базе данных
 //                  Failure:    - null
 //===============================================================================================================
-    public static List<string[]> ReadTable(string tablename, string fields, string where, string order)
+        public static List<string[]> ReadTable(string tablename, string fields, string where, string order)
         {
             if (Connection == null) return null;
             Stopwatch stopWatch = new Stopwatch();

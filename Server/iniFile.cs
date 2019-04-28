@@ -137,13 +137,15 @@ namespace SmartHome
 //===============================================================================================================
         private static void WriteString(string section, string key, string value)
         {
-            String newFileName = _fileName != "" ? _fileName
+            String newFileName = _fileName != "" 
+                ? _fileName
                 : AppDomain.CurrentDomain.BaseDirectory + IniFileName;
             WritePrivateProfileString(section, key, value, newFileName);
         } // void WriteString(section, key, value)
 
         [DllImport("kernel32")]
-        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal,
+            int size, string filePath);
 
         [DllImport("kernel32")]
         private static extern int WritePrivateProfileString(string section, string key, string str, string filePath);
