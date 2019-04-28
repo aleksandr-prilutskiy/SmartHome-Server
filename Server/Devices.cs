@@ -202,6 +202,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void TurnOffAll()
         {
+            return;
             foreach (var device in DevicesList)
                 if ((device.Options & (ushort)DeviceOption.OffAll) > 0)
                 {

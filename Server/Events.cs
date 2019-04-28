@@ -256,9 +256,9 @@ namespace SmartHome
                             }
                             status = true;
                             break;
-                        case "turn off all":
-                            Devices.TurnOffAll();
-                            break;
+                        //case "turn off all":
+                            //Devices.TurnOffAll();
+                            //break;
                     }
                     break;
                 case "nooLite":
