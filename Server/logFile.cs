@@ -12,6 +12,7 @@ namespace SmartHome
     class LogFile
     {
         private const string LogFileName = "SmartHomeServer.log"; // Имя файла журнала
+        private const string LogSubDir = "logs";                  // Подкаталог log-файлов
         private static string _fileName;
         private static List<String> _buffer;
         private static bool _busy;
@@ -24,7 +25,7 @@ namespace SmartHome
         public LogFile()
         {
             _buffer = new List<String>();
-            String path = AppDomain.CurrentDomain.BaseDirectory + "Logs";
+            String path = AppDomain.CurrentDomain.BaseDirectory + LogSubDir;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             _fileName = path + "//" + LogFileName;
             StreamWriter stream = null;
@@ -119,7 +120,7 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                Program.AppWindow.WriteToLog("Error: файл '" + LogFileName + "' не может быть прочитан");
+                Program.AppWindow.WriteToLog(Resources.LogMsgError + "файл '" + LogFileName + "' не может быть прочитан");
                 return;
             }
             _busy = true;
@@ -132,7 +133,7 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                Program.AppWindow.WriteToLog("Error: ошибка чтения из файла '" + LogFileName  + "'");
+                Program.AppWindow.WriteToLog(Resources.LogMsgError + "ошибка чтения из файла '" + LogFileName  + "'");
             }
             finally
             {

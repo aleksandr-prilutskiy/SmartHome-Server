@@ -115,7 +115,8 @@ namespace SmartHome
 //===============================================================================================================
         public static void PingAll()
         {
-            Sensors.MqttReConnect();
+            nooLite.MtrfReConnect();
+            MQTT.Connect();
             Sensors.SystemMonitoring();
             if (DevicesList.Count == 0) return;
             nooLite.SendCommand(63, "readstate");
@@ -173,7 +174,7 @@ namespace SmartHome
                 if (e.Reply.Status.ToString() == "Success")
                 {
                     state = 1;
-                    if (IniFile.PingLogEnable)
+                    if (Program.PingLogEnable)
                         LogFile.Add("Ping: " + device.Addr + " .. " + e.Reply.RoundtripTime + " ms");
                 }
                 SetState(device, state);
@@ -202,7 +203,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void TurnOffAll()
         {
-            return;
+            //return;
             foreach (var device in DevicesList)
                 if ((device.Options & (ushort)DeviceOption.OffAll) > 0)
                 {
@@ -210,7 +211,7 @@ namespace SmartHome
                     newevent.Application = device.Driver;
                     newevent.Command = "off";
                     newevent.Device = device.Name;
-                    Events.HandleEvent(newevent);
+                    HandleEvent.Execute(newevent, (byte)Events.EventMode.Script);
                 }
         } // void TurnOffAll()
 

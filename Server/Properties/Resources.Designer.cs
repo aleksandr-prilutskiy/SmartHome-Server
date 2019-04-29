@@ -94,6 +94,15 @@ namespace SmartHome.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на База данных подключена.
+        /// </summary>
+        internal static string DatabaseConnected {
+            get {
+                return ResourceManager.GetString("DatabaseConnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Невозможно установить подключение к базе данных.
         /// </summary>
         internal static string DatabaseConnectedError {
@@ -103,8 +112,7 @@ namespace SmartHome.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Ошибка:
-        ///Невозможно подключиться к базе данных.
+        ///   Ищет локализованную строку, похожую на Ошибка: Невозможно подключиться к базе данных.
         ///.
         /// </summary>
         internal static string DatabaseConnectError {
@@ -139,6 +147,15 @@ namespace SmartHome.Properties {
         internal static string LogFileCreateError {
             get {
                 return ResourceManager.GetString("LogFileCreateError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Error: .
+        /// </summary>
+        internal static string LogMsgError {
+            get {
+                return ResourceManager.GetString("LogMsgError", resourceCulture);
             }
         }
         

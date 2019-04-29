@@ -13,17 +13,22 @@ namespace SmartHome
         public bool EnableExit;
         private static bool _busy;
 
+//===============================================================================================================
+// Name...........:	FormMain
+// Description....:	Инициализация объекта
+// Syntax.........:	new FormMain()
+//===============================================================================================================
         public FormMain()
         {
             InitializeComponent();
             IniFile.ReadConfig();
             Size resolution = Screen.PrimaryScreen.Bounds.Size;
-            if (IniFile.AppWindowPosX + IniFile.AppWindowWidth > resolution.Width)
-                IniFile.AppWindowPosX = resolution.Width - IniFile.AppWindowWidth;
-            if (IniFile.AppWindowPosY + IniFile.AppWindowHeight > resolution.Height)
-                IniFile.AppWindowPosY = resolution.Height - IniFile.AppWindowHeight;
-            Location = new Point(Math.Max(IniFile.AppWindowPosX, 0), Math.Max(IniFile.AppWindowPosY, 0));
-            Size = new Size(IniFile.AppWindowWidth, IniFile.AppWindowHeight);
+            if (Program.AppWindowPosX + Program.AppWindowWidth > resolution.Width)
+                Program.AppWindowPosX = resolution.Width - Program.AppWindowWidth;
+            if (Program.AppWindowPosY + Program.AppWindowHeight > resolution.Height)
+                Program.AppWindowPosY = resolution.Height - Program.AppWindowHeight;
+            Location = new Point(Math.Max(Program.AppWindowPosX, 0), Math.Max(Program.AppWindowPosY, 0));
+            Size = new Size(Program.AppWindowWidth, Program.AppWindowHeight);
             FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
             labelAbout.Text = String.Format(Resources.AboutText, info.FileVersion);
             notifyIcon.ContextMenuStrip = contextMenuTray;
@@ -114,7 +119,7 @@ namespace SmartHome
                 if (text.Remove(0, 10).Remove(7) == "Event: ") color = Color.Green;
                 if (text.Remove(0, 10).Remove(15) == "Shedule event: ") color = Color.DarkOliveGreen;
                 if (text.Remove(0, 10).Remove(14) == "Script event: ") color = Color.DarkGreen;
-                if (text.Remove(0, 10).Remove(7) == "Error: ") color = Color.Red;
+                if (text.Remove(0, 10).Remove(Resources.LogMsgError.Length) == Resources.LogMsgError) color = Color.Red;
                 if (text.Remove(0, 10).Remove(6) == "Ping: ") color = Color.Blue;
                 if (text.Remove(0, 10).Remove(9) == "nooLite: ") color = Color.DarkBlue;
                 if (text.Remove(0, 10).Remove(6) == "MQTT: ") color = Color.DeepPink;
@@ -151,7 +156,7 @@ namespace SmartHome
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             WindowState = FormWindowState.Normal;
             Devices.StopPing();
-            Sensors.MqttDisconnect();
+            MQTT.Disconnect();
             MySql.Close();
             IniFile.SaveConfig();
             EnableExit = true;

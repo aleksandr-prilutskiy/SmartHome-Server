@@ -2,29 +2,14 @@
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using SmartHome.Properties;
 
 namespace SmartHome
 {
     // Объект для работы с файлом конфигурации программы
     class IniFile
     {
-        private const string IniFileName = "SmartHomeServer.ini"; // Имя файла конфигурации программы
-        private static string _fileName = "";       // Полное файла конфигурации программы (с каталогом)
-        public static int AppWindowPosX;            // Положение окна прогаммы по горизонтали
-        public static int AppWindowPosY;            // Положение окна прогаммы по вертикали
-        public static int AppWindowWidth;           // Размер окна прогаммы по горизонтали
-        public static int AppWindowHeight;          // Размер окна прогаммы по вертикали
-        public static string DatabaseAddress;       // Адрес сервера базы данных
-        public static int DatabasePort;             // Порт сервера базы данных
-        public static string DatabaseName;          // Имя базы данных
-        public static string DatabaseUser;          // Имя пользователя для подключения к базе данных
-        public static string DatabasePassword;      // Пароль пользователя для подключения к базе данных
-        public static bool EventsLogEnable;
-        public static bool PingLogEnable;
-        public static bool NooLiteLogEnable;
-        public static bool MqttLogEnable;
+        private const string IniFileName = "SmartHomeServer.ini";   // Имя файла конфигурации программы
+        private static string _fileName = "";                       // Полное файла конфигурации программы (с каталогом)
 
 //===============================================================================================================
 // Name...........:	ReadConfig
@@ -36,23 +21,26 @@ namespace SmartHome
             _fileName = AppDomain.CurrentDomain.BaseDirectory + IniFileName;
             if (!File.Exists(_fileName))
             {
-                MessageBox.Show(Resources.NoIniFile, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _fileName = "";
                 return;
             }
-            AppWindowPosX    = ReadInt("Window", "Pos_X", 0);
-            AppWindowPosY    = ReadInt("Window", "Pos_Y", 0);
-            AppWindowWidth   = ReadInt("Window", "Size_X", 450);
-            AppWindowHeight  = ReadInt("Window", "Size_Y", 300);
-            DatabaseAddress  = ReadString("Database", "Host", "localhost");
-            DatabasePort     = ReadInt("Database", "Port", 3306);
-            DatabaseName     = ReadString("Database", "Name", "smart_home");
-            DatabaseUser     = ReadString("Database", "User", "root");
-            DatabasePassword = ReadString("Database", "Password", "");
-            EventsLogEnable  = ReadBool("Log", "Events", false);
-            PingLogEnable    = ReadBool("Log", "Ping", false);
-            NooLiteLogEnable = ReadBool("Log", "nooLite", false);
-            MqttLogEnable    = ReadBool("Log", "MQTT", false);
+            Program.AppWindowPosX     = ReadInt("Window", "Pos_X", 0);
+            Program.AppWindowPosY     = ReadInt("Window", "Pos_Y", 0);
+            Program.AppWindowWidth    = ReadInt("Window", "Size_X", 450);
+            Program.AppWindowHeight   = ReadInt("Window", "Size_Y", 300);
+            Program.DatabaseAddress   = ReadString("Database", "Host", "localhost");
+            Program.DatabasePort      = ReadInt("Database", "Port", 3306);
+            Program.DatabaseName      = ReadString("Database", "Name", "smart_home");
+            Program.DatabaseUser      = ReadString("Database", "User", "root");
+            Program.DatabasePassword  = ReadString("Database", "Password", "");
+            Program.MqttBrokerAddress = ReadString("MQTT", "Host", "localhost");
+            Program.MqttBrokerPort    = ReadInt("MQTT", "Port", 1883);
+            Program.MqttUserName      = ReadString("MQTT", "User", "");
+            Program.MqttPassword      = ReadString("MQTT", "Password", "");
+            Program.EventsLogEnable   = ReadBool("Log", "Events", false);
+            Program.PingLogEnable     = ReadBool("Log", "Ping", false);
+            Program.NooLiteLogEnable  = ReadBool("Log", "nooLite", false);
+            Program.MqttLogEnable     = ReadBool("Log", "MQTT", false);
     } // void ReadConfig()
 
 //===============================================================================================================
@@ -66,10 +54,10 @@ namespace SmartHome
             WriteString("Window", "Pos_Y", Program.AppWindow.Location.Y.ToString());
             WriteString("Window", "Size_X", Program.AppWindow.Size.Width.ToString());
             WriteString("Window", "Size_Y", Program.AppWindow.Size.Height.ToString());
-            WriteString("Log", "Events", EventsLogEnable.ToString());
-            WriteString("Log", "Ping", PingLogEnable.ToString());
-            WriteString("Log", "nooLite", NooLiteLogEnable.ToString());
-            WriteString("Log", "MQTT", MqttLogEnable.ToString());
+            WriteString("Log", "Events", Program.EventsLogEnable.ToString());
+            WriteString("Log", "Ping", Program.PingLogEnable.ToString());
+            WriteString("Log", "nooLite", Program.NooLiteLogEnable.ToString());
+            WriteString("Log", "MQTT", Program.MqttLogEnable.ToString());
         } // void saveConfig()
 
 //===============================================================================================================
@@ -135,7 +123,7 @@ namespace SmartHome
 //                  key         - имя параметра в ini-файле
 //                  value       - значение параметра
 //===============================================================================================================
-        private static void WriteString(string section, string key, string value)
+        public static void WriteString(string section, string key, string value)
         {
             String newFileName = _fileName != "" 
                 ? _fileName

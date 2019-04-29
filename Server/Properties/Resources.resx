@@ -121,8 +121,7 @@
     <value>SmartHome Server</value>
   </data>
   <data name="DatabaseConnectError" xml:space="preserve">
-    <value>Ошибка:
-Невозможно подключиться к базе данных.
+    <value>Ошибка: Невозможно подключиться к базе данных.
 </value>
   </data>
   <data name="AboutText" xml:space="preserve">
@@ -159,5 +158,11 @@
   </data>
   <data name="LogFileCreateError" xml:space="preserve">
     <value>Невозможно создать файл журнала</value>
+  </data>
+  <data name="DatabaseConnected" xml:space="preserve">
+    <value>База данных подключена</value>
+  </data>
+  <data name="LogMsgError" xml:space="preserve">
+    <value>Error: </value>
   </data>
 </root>

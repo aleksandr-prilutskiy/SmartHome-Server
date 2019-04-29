@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Threading;
-using System.Windows.Forms;
 using SmartHome.Properties;
 
 namespace SmartHome
@@ -73,7 +72,7 @@ namespace SmartHome
             Switch          = 4,    // Включает или выключает нагрузку
           //BrightBack      = 5,    // Запускает плавное изменение яркости в обратном направлении
           //SetBrightness   = 6,    // Установить заданную в расширении команды яркость
-            LoadPreset      = 7,    // Вызвать записанный сценарий
+          //LoadPreset      = 7,    // Вызвать записанный сценарий
           //SavePreset      = 8,    // Записать сценарий в память
           //Unbind          = 9,    // Стирание адреса управ. устройства из памяти исполнит.
           //StopReg         = 10,   // Прекращает действие команд Bright_Down, Bright_Up, Bright_Back
@@ -117,7 +116,7 @@ namespace SmartHome
             PortMtrf64 = FindPortMtrf();
             if (PortMtrf64.Length == 0)
             {
-                LogFile.Add("Error: модуль nooLite MTRF-64-USB не обнаружен");
+                LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не обнаружен");
                 return;
             }
             var packet = new Byte[BufferSize];
@@ -138,7 +137,7 @@ namespace SmartHome
             }
             else
             {
-                LogFile.Add("Error: модуль nooLite MTRF-64-USB не подключен");
+                LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не подключен");
             }
         } // void nooLite()
 
@@ -200,6 +199,16 @@ namespace SmartHome
             }
             return "";
         } // String FindPortMtrf()
+
+//===============================================================================================================
+// Name...........:	MtrfReConnect
+// Description....:	Переподключение к модулю nooLite MTRF-64 USB
+// Syntax.........:	MtrfReConnect()
+//===============================================================================================================
+        public static void MtrfReConnect()
+        {
+        } // void MtrfReConnect()
+
 
 //===============================================================================================================
 // Name...........:	SendCommand
@@ -267,7 +276,7 @@ namespace SmartHome
             }
             bufferTx[(byte)Tx.Crc] = GetBufferCrc(bufferTx);
             bufferTx[(byte)Tx.Sp] = 172;
-            if (IniFile.NooLiteLogEnable) BufferToLog(bufferTx);
+            if (Program.NooLiteLogEnable) BufferToLog(bufferTx);
             _serial.Write(bufferTx, 0, bufferTx.Length);
             return true;
         } // bool SendCommand(channel, commandstr, parameters)
@@ -298,7 +307,7 @@ namespace SmartHome
             Incoming[Incoming.Count - 1] = buffer;
             while (Incoming.Count > 1)
             {
-                if (IniFile.NooLiteLogEnable) BufferToLog(Incoming[0]);
+                if (Program.NooLiteLogEnable) BufferToLog(Incoming[0]);
                 if (Incoming[0][(byte)Rx.Cmd] == (byte)Command.SendState)
                 {
                     foreach (var device in Devices.DevicesList)

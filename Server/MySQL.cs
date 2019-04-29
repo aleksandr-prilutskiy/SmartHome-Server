@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using SmartHome.Properties;
 
@@ -16,17 +15,27 @@ namespace SmartHome
 
 //===============================================================================================================
 // Name...........:	MySql
-// Description....:	Подключение к базе данных
+// Description....:	Инициализация объекта
 // Syntax.........:	new MySql()
 //===============================================================================================================
         public MySql()
         {
+            Connect();
+        } // MySql()
+
+//===============================================================================================================
+// Name...........:	Connect
+// Description....:	Подключение к базе данных
+// Syntax.........:	Connect()
+//===============================================================================================================
+        public static void Connect()
+        {
             Connection = null;
-            string connectionString = "server=" + IniFile.DatabaseAddress +
-                ";port=" + IniFile.DatabasePort.ToString() +
-                ";database=" + IniFile.DatabaseName +
-                ";user=" + IniFile.DatabaseUser +
-                ";password=" + IniFile.DatabasePassword + ";";
+            string connectionString = "server=" + Program.DatabaseAddress + ";" + 
+                                      "port=" + Program.DatabasePort.ToString() + ";" +
+                                      "database=" + Program.DatabaseName + ";" +
+                                      "user=" + Program.DatabaseUser + ";" +
+                                      "password=" + Program.DatabasePassword + ";";
             try
             {
                 Connection = new MySqlConnection(connectionString);
@@ -34,61 +43,20 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                LogFile.Add(Resources.DatabaseConnectError);
                 Connection = null;
             }
-            if (Connection != null)
+            if (Connection == null)
             {
-                LogFile.Add("База данных подключена");
+                LogFile.Add(Resources.DatabaseConnectError);
+                Program.AppWindow.pictureBoxConnectMySQL.Image = Resources.gray;
+            }
+            else
+            {
+                LogFile.Add(Resources.DatabaseConnected);
                 Program.AppWindow.pictureBoxConnectMySQL.Image = Resources.green;
             }
             _busy = false;
-            LoadConfig();
-        } // MySql()
-
-//===============================================================================================================
-// Name...........:	LoadConfig
-// Description....:	Чтение из базы данных всех настроек, необходимых для работы программы
-// Syntax.........:	LoadConfig()
-//===============================================================================================================
-        public static void LoadConfig()
-        {
-            _busy = true;
-            if (Connection == null) return;
-            MySqlCommand command = new MySqlCommand("SELECT * FROM `config`;", Connection);
-            try
-            {
-                MySqlDataReader readData = command.ExecuteReader();
-                if (readData.HasRows)
-                {
-                    while (readData.Read())
-                    {
-                        switch ((string)readData[1])
-                        {
-                            case "MQTT_Address":
-                                Sensors.MqttBrokerAddress = (string)readData[2];
-                                break;
-                            case "MQTT_Port":
-                                if (!int.TryParse(readData[2].ToString(), out Sensors.MqttBrokerPort))
-                                    Sensors.MqttBrokerPort = 1883;
-                                break;
-                            case "MQTT_User":
-                                Sensors.MqttUserName = (string)readData[2];
-                                break;
-                            case "MQTT_Password":
-                                Sensors.MqttPassword = (string)readData[2];
-                                break;
-                        }
-                    }
-                }
-                readData.Close();
-            }
-            catch (Exception)
-            {
-                LogFile.Add("Error: ошибка чтения настроек системы из базы данных");
-            }
-            _busy = false;
-        } // void LoadConfig(mainForm)
+        } // Connect()
 
 //===============================================================================================================
 // Name...........:	ReadTable
@@ -100,6 +68,7 @@ namespace SmartHome
 //===============================================================================================================
         public static List<string[]> ReadTable(string tablename)
         {
+            if (Connection == null) return null;
             return ReadTable(tablename, "*", "", "");
         } // List<string[]> ReadTable(tablename)
 
@@ -114,6 +83,7 @@ namespace SmartHome
 //===============================================================================================================
         public static List<string[]> ReadTable(string tablename, string where)
         {
+            if (Connection == null) return null;
             return ReadTable(tablename, "*", where, "");
         } // List<string[]> ReadTable(tablename, where)
 
@@ -129,6 +99,7 @@ namespace SmartHome
 //===============================================================================================================
         public static List<string[]> ReadTable(string tablename, string fields, string where)
         {
+            if (Connection == null) return null;
             return ReadTable(tablename, fields, where, "");
         } // List<string[]> ReadTable(tablename, fields, where)
 
@@ -156,7 +127,7 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                LogFile.Add("Error: ошибка чтения таблицы '" + tablename + "' из базы данных");
+                LogFile.Add(Resources.LogMsgError + "ошибка чтения таблицы '" + tablename + "' из базы данных");
                 return null;
             }
             _busy = true;
@@ -183,7 +154,7 @@ namespace SmartHome
             catch
             {
                 newTable = null;
-                LogFile.Add("Error: ошибка чтения таблицы '" + tablename + "' из базы данных");
+                LogFile.Add(Resources.LogMsgError + "ошибка чтения таблицы '" + tablename + "' из базы данных");
             }
             _busy = false;
             return newTable;
@@ -199,6 +170,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void SaveTo(string tablename, string fields, string values)
         {
+            if (Connection == null) return;
             SaveTo(tablename, fields, values, "");
         } // void SaveTo(tablename, fields, values)
 

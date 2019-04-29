@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 
 namespace SmartHome
 {
-    // Обработчик событий
+    // Объект для работы с событиями системы "Умный дом" (включая события по расписанию и сценарии)
     public class Events
     {
+        public enum EventMode : byte    // Режимы событий
+        {
+            Interface   = 0x00,         // Интерфейс
+            Shedule     = 0x01,         // Расписание
+            Script      = 0x02,         // Сценарий
+        } // enum EventMode
+
         private enum SheduleMode : byte // Режимы повторения событий
         {
             Once        = 0x00,         // Один раз (без повторений)
@@ -19,10 +23,6 @@ namespace SmartHome
             Monthly     = 0x05,         // Каждый месяц
             Yearly      = 0x06,         // Каждый год
         } // enum SheduleMode
-
-        private static string[] Expressions = { // Список обрабатываемых выражений
-            "device", "sensor"
-        }; // string[] Expressions
 
         public class Event              // Запись о событии
         {
@@ -58,10 +58,10 @@ namespace SmartHome
         public Events()
         {
             SheduleList = new List<Shedule>();
-            LoadShedule();
             ScriptsList = new List<Script>();
+            LoadShedule();
             LoadScripts();
-            MySql.SaveTo("events", "status", "-1", "status = 0");
+            MySql.SaveTo("events", "status", "-1", "status = 0"); // отметки о пропущенных событиях
             Program.AppWindow.timerEvents.Enabled = true;
         } // Events()
 
@@ -96,7 +96,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void LoadScripts()
         {
-            var table = MySql.ReadTable("scripts", "*", "enable = 1", "metric ASC");
+            var table = MySql.ReadTable("scripts", "*", "enable = 1", "id ASC");
             if (table == null) return;
             foreach (var record in table)
             {
@@ -131,13 +131,13 @@ namespace SmartHome
                 newevent.Command = record[3];
                 newevent.Device = record[4];
                 newevent.Parameters = record[5];
-                if (IniFile.EventsLogEnable)
+                if (Program.EventsLogEnable)
                     LogFile.Add("Event: " +
                         newevent.Application + " " +
                         newevent.Command + " " +
                         newevent.Device + " " +
                         newevent.Parameters);
-                HandleEvent(newevent);
+                HandleEvent.Execute(newevent, (byte)EventMode.Interface);
             }
         } // void ChekEvents()
 
@@ -151,13 +151,13 @@ namespace SmartHome
             foreach (var shedule in SheduleList)
             {
                 if ((shedule.NextTime == DateTime.MinValue) || (shedule.NextTime > DateTime.Now)) continue;
-                if (IniFile.EventsLogEnable)
+                if (Program.EventsLogEnable)
                     LogFile.Add("Shedule event: " +
                         shedule.Application + " " +
                         shedule.Command + " " +
                         shedule.Device + " " +
                         shedule.Parameters);
-                HandleEvent(shedule);
+                HandleEvent.Execute(shedule, (byte)EventMode.Shedule);
                 switch (shedule.Mode)
                 {
                     case (byte) SheduleMode.Once:
@@ -203,202 +203,17 @@ namespace SmartHome
                 if ((script.Timer != DateTime.MinValue) && (script.Timeout > 0))
                     if (DateTime.Now < script.Timer) continue;
                 if (script.Rules.IndexOf("sensor(" + sensor.Topic + ")", StringComparison.Ordinal) < 0) continue;
-                if (!ChekLexeme(ReplaceExpressions(script.Rules))) continue;
-                if (IniFile.EventsLogEnable)
+                if (!HandleEvent.ChekLexeme(HandleEvent.ReplaceExpressions(script.Rules))) continue;
+                if (Program.EventsLogEnable)
                     LogFile.Add("Script event: " +
                         script.Application + " " +
                         script.Command + " " +
                         script.Device + " " +
                         script.Parameters);
-                HandleEvent(script);
+                HandleEvent.Execute(script, (byte)EventMode.Script);
                 script.Timer = DateTime.Now.AddSeconds(script.Timeout);
             }
         } //  ChekScripts()
-
-//===============================================================================================================
-// Name...........:	HandleEvent
-// Description....:	Обработка события
-// Syntax.........:	HandleEvent(newevent)
-//===============================================================================================================
-        public static void HandleEvent(Event newevent)
-        {
-            bool status = false;
-            switch (newevent.Application)
-            {
-                case "@":
-                    switch (newevent.Command)
-                    {
-                        case "reload":
-                            switch (newevent.Parameters)
-                            {
-                                case "devices":
-                                    Program.AppWindow.GridViewDevices.Rows.Clear();
-                                    Devices.DevicesList.Clear();
-                                    Devices.LoadTable();
-                                    break;
-                                case "sensors":
-                                    Program.AppWindow.GridViewSensors.Rows.Clear();
-                                    Sensors.SensorsList.Clear();
-                                    Sensors.LoadTable();
-                                    break;
-                                case "shedule":
-                                    Program.AppWindow.timerEvents.Enabled = false;
-                                    SheduleList.Clear();
-                                    LoadShedule();
-                                    Program.AppWindow.timerEvents.Enabled = true;
-                                    break;
-                                case "scripts":
-                                    Program.AppWindow.timerEvents.Enabled = false;
-                                    ScriptsList.Clear();
-                                    LoadScripts();
-                                    Program.AppWindow.timerEvents.Enabled = true;
-                                    break;
-                            }
-                            status = true;
-                            break;
-                        //case "turn off all":
-                            //Devices.TurnOffAll();
-                            //break;
-                    }
-                    break;
-                case "nooLite":
-                    var device = Devices.Find(newevent.Device);
-                    if (device != null)
-                        status = nooLite.SendCommand(device.Channel, newevent.Command, newevent.Parameters);
-                    break;
-                default:
-                    status = ExecuteFile(newevent);
-                    break;
-            }
-            MySql.SaveTo("events", "status", status.ToString(), "id = '" + newevent.Id + "'");
-        } // void HandleEvent(newevent)
-
-//===============================================================================================================
-// Name...........:	ExecuteFile
-// Description....:	Запуск внешнего файла обработки события (драйвера)
-// Syntax.........:	ExecuteFile(newevent)
-// Return value(s):	Success:    - true
-//                  Failure:    - false
-//===============================================================================================================
-        public static bool ExecuteFile(Event newevent)
-        {
-            string exeFile = AppDomain.CurrentDomain.BaseDirectory + "Utils\\" + newevent.Application + ".exe";
-            if (!File.Exists(exeFile))
-            {
-                LogFile.Add("Error: файл " + exeFile + " - не найден");
-                MySql.SaveTo("events", "status", "-1", "id = '" + newevent.Id + "'");
-                return false;
-            }
-            Process iStartProcess = new Process();
-            iStartProcess.StartInfo.FileName = exeFile;
-            iStartProcess.StartInfo.Arguments = "";
-            if (newevent.Command.Length > 0)
-                iStartProcess.StartInfo.Arguments += " " + newevent.Command;
-            if (newevent.Device.Length > 0)
-                iStartProcess.StartInfo.Arguments += " " + newevent.Device;
-            if (newevent.Parameters.Length > 0)
-                iStartProcess.StartInfo.Arguments += " " + ReplaceExpressions(newevent.Parameters);
-            if (iStartProcess.Start()) return true;
-            return false;
-        } // bool ExecuteFile(newevent)
-
-//===============================================================================================================
-// Name...........:	ReplaceExpressions
-// Description....:	Замена всех выражений в исходной строке на их значения
-// Syntax.........:	ReplaceExpressions(source)
-// Parameters.....:	source      - исходная срока
-// Return value(s):	            - строка, в которой все выражения заменены на их значения
-//===============================================================================================================
-        public static String ReplaceExpressions(String source)
-        {
-            foreach (var expression in Expressions)
-            {
-                int namepos = source.ToLower().IndexOf(expression + "(", StringComparison.Ordinal);
-                if (namepos < 0) continue;
-                int namelen = source.Substring(namepos + expression.Length + 1).IndexOf(")", StringComparison.Ordinal);
-                if (namelen < 0) continue;
-                String identifier = source.Substring(namepos + expression.Length + 1, namelen);
-                if (expression == Expressions[0]) // device
-                {
-                    var device = Devices.Find(identifier);
-                    identifier = "";
-                    if (device != null) identifier = device.State.ToString();
-                }
-                else if (expression == Expressions[1]) // sensor
-                {
-                    var sensor = Sensors.Find(identifier);
-                    identifier = "";
-                    if (sensor != null) identifier = sensor.Value;
-                }
-                if (identifier.Length > 0)
-                    return ReplaceExpressions(source.Substring(0, namepos) + identifier +
-                        source.Substring(namepos + expression.Length + namelen + 2));
-            }
-            return source;
-        } // String ReplaceExpressions(String source)
-
-//===============================================================================================================
-// Name...........:	ChekLexeme
-// Description....:	Рекурсивная проверка логического выражения в исходной строке
-// Syntax.........:	ChekLexeme(source)
-// Parameters.....:	source      - исходная строка
-// Return value(s):	true        - логическое выражение верно
-//                  false       - логическое выражение неверно
-//===============================================================================================================
-        public static bool ChekLexeme(String source)
-        {
-            var substring = new String[2];
-            var values = new decimal[2];
-            if (SplitLexeme(source, "&", substring)) return ChekLexeme(substring[0]) && ChekLexeme(substring[1]);
-            if (SplitLexeme(source, "|", substring)) return ChekLexeme(substring[0]) || ChekLexeme(substring[1]);
-            if (SplitLexeme(source, ">", values)) return values[0] > values[1];
-            if (SplitLexeme(source, "<", values)) return values[0] < values[1];
-            if (SplitLexeme(source, "=", values)) return values[0] == values[1];
-            if (SplitLexeme(source, ">=", values)) return values[0] >= values[1];
-            if (SplitLexeme(source, "<=", values)) return values[0] <= values[1];
-            if (SplitLexeme(source, "<>", values)) return values[0] != values[1];
-            return false;
-        } // bool ChekLexeme(source)
-
-//===============================================================================================================
-// Name...........:	SplitLexeme
-// Description....:	Разбиение логического выражения на две части по первому вхожению разделителя
-// Syntax.........:	SplitLexeme(source, splitter, result)
-// Parameters.....:	source      - исходная строка
-//                  splitter    - разделитель (строка)
-//                  result      - массив из двух чисел, в котором возвращается результат разбиения выражения
-// Return value(s):	true        - разделитель найден, в result возвращеются две подстроки
-//                  false       - разделитель не найден, result не изменен
-//===============================================================================================================
-        public static bool SplitLexeme(String lexeme, String splitter, decimal[] result)
-        {
-            var substring = new String[2];
-            if (!SplitLexeme(lexeme, splitter, substring)) return false;
-            CultureInfo culture = CultureInfo.CreateSpecificCulture("en-GB");
-            NumberStyles style = NumberStyles.AllowDecimalPoint;
-            if (!decimal.TryParse(substring[0], style, culture, out result[0])) return false;
-            if (!decimal.TryParse(substring[1], style, culture, out result[1])) return false;
-            return true;
-        } // bool SplitLexeme(source, splitter, decimal[])
-
-//===============================================================================================================
-// Name...........:	SplitLexeme
-// Description....:	Разбиение логического выражения на две части по первому вхожению разделителя
-// Syntax.........:	SplitLexeme(source, splitter, result)
-// Parameters.....:	source      - исходная строка
-//                  splitter    - разделитель (строка)
-//                  result      - массив из двух строк, в котором возвращается результат разбиения выражения
-// Return value(s):	true        - разделитель найден, в result возвращеются две подстроки
-//                  false       - разделитель не найден, result не изменен
-//===============================================================================================================
-        public static bool SplitLexeme(String source, String splitter, String[] result)
-        {
-            int pos = source.IndexOf(splitter, StringComparison.Ordinal);
-            if (pos < 0) return false;
-            result[0] = source.Substring(0, pos).Trim();
-            result[1] = source.Substring(pos + splitter.Length).Trim();
-            return true;
-        } // bool SplitLexeme(source, splitter, String[])
 
     } // class Events
 } // namespace SmartHome
