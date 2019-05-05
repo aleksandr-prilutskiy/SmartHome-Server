@@ -6,12 +6,13 @@ using SmartHome.Properties;
 
 namespace SmartHome
 {
+    // ReSharper disable once InconsistentNaming
     public class MQTT
     {
 
-        private static MqttClient Client;
-        private static string clientId;
-        private static DateTime ReconnectTimer;
+        private static MqttClient _client;
+        private static string _clientId;
+        private static DateTime _reconnectTimer;
 
 //===============================================================================================================
 // Name...........:	MQTT
@@ -20,9 +21,9 @@ namespace SmartHome
 //===============================================================================================================
         public MQTT()
         {
-            clientId = "SmartHome Server: " + Guid.NewGuid().ToString("N");
-            ReconnectTimer = DateTime.Now;
-            Client = null;
+            _clientId = "SmartHome Server: " + Guid.NewGuid().ToString("N");
+            _reconnectTimer = DateTime.Now;
+            _client = null;
             Connect();
         } // MQTT()
 
@@ -34,41 +35,41 @@ namespace SmartHome
         public static void Connect()
         {
             if (Program.MqttBrokerAddress == "") return;
-            if (Client == null)
+            if (_client == null)
             {
-                if (ReconnectTimer > DateTime.Now) return;
-                ReconnectTimer = DateTime.Now.AddMinutes(5);
+                if (_reconnectTimer > DateTime.Now) return;
+                _reconnectTimer = DateTime.Now.AddMinutes(5);
                 try
                 {
-                    Client = new MqttClient(Program.MqttBrokerAddress, Program.MqttBrokerPort, false,
+                    _client = new MqttClient(Program.MqttBrokerAddress, Program.MqttBrokerPort, false,
                         null, null, MqttSslProtocols.None);
-                    Client.MqttMsgPublishReceived += MsgPublishReceived;
+                    _client.MqttMsgPublishReceived += MsgPublishReceived;
                 }
                 catch (Exception)
                 {
-                    Client = null;
+                    _client = null;
                 }
             }
-            if ((Client != null) && (!Client.IsConnected))
+            if ((_client != null) && (!_client.IsConnected))
             {
                 try
                 {
-                    Client.Connect(clientId, Program.MqttUserName, Program.MqttPassword);
+                    _client.Connect(_clientId, Program.MqttUserName, Program.MqttPassword);
                 }
                 catch (Exception)
                 {
-                    Client = null;
+                    _client = null;
                 }
-                if ((Client != null) && (Client.IsConnected))
+                if ((_client != null) && (_client.IsConnected))
                 {
                     SubscribeToAll();
-                    LogFile.Add("Установлено подключение к брокеру MQTT: " +
+                    LogFile.Add(Resources.LogMsgMQTT + "установлено подключение к брокеру MQTT: " +
                         Program.MqttBrokerAddress + ":" + Program.MqttBrokerPort.ToString());
                     Program.AppWindow.pictureBoxConnectMQTT.Image = Resources.green;
                 }
                 else
                 {
-                    LogFile.Add(Resources.LogMsgError + "Ошибка подключения к брокеру MQTT");
+                    LogFile.Add(Resources.LogMsgError + "ошибка подключения к брокеру MQTT");
                     Program.AppWindow.pictureBoxConnectMQTT.Image = Resources.gray;
                 }
             }
@@ -81,8 +82,8 @@ namespace SmartHome
 //===============================================================================================================
         public static void SubscribeToAll()
         {
-            if (Client == null) return;
-            Client.Subscribe(new[] { "#" }, new[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            if (_client == null) return;
+            _client.Subscribe(new[] { "#" }, new[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
         } // void SubscribeToAll()
 
 //===============================================================================================================
@@ -97,7 +98,7 @@ namespace SmartHome
             if (sensor == null) return;
             sensor.Value = Encoding.UTF8.GetString(message);
             Sensors.SaveToDatabase(sensor);
-            if (Program.MqttLogEnable) LogFile.Add("MQTT: " + sensor.Topic + " = " + sensor.Value);
+            if (Program.MqttLogEnable) LogFile.Add(Resources.LogMsgMQTT + sensor.Topic + " = " + sensor.Value);
         } // void MsgPublishReceived(sender, e)
 
 //===============================================================================================================
@@ -107,10 +108,10 @@ namespace SmartHome
 //===============================================================================================================
         public static void Disconnect()
         {
-            if (Client == null) return;
-            Client.Disconnect();
-            Client = null;
-            ReconnectTimer = DateTime.Now;
+            if (_client == null) return;
+            _client.Disconnect();
+            _client = null;
+            _reconnectTimer = DateTime.Now;
         } // void Disconnect()
 
     } // class

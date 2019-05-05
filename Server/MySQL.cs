@@ -8,20 +8,21 @@ using SmartHome.Properties;
 namespace SmartHome
 {
     // Объект для работы с базой данных MySQL
-    class MySql
+    // ReSharper disable once InconsistentNaming
+    class MySQL
     {
-        public static MySqlConnection Connection;
-        private static bool _busy;
+        public static MySqlConnection Connection;       // Соединение для работы с базой данных
+        private static bool _busy;                      // Признак захвата потока доступа к базе данных
 
 //===============================================================================================================
-// Name...........:	MySql
+// Name...........:	MySQL
 // Description....:	Инициализация объекта
-// Syntax.........:	new MySql()
+// Syntax.........:	new MySQL()
 //===============================================================================================================
-        public MySql()
+        public MySQL()
         {
             Connect();
-        } // MySql()
+        } // MySQL()
 
 //===============================================================================================================
 // Name...........:	Connect
@@ -127,7 +128,8 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                LogFile.Add(Resources.LogMsgError + "ошибка чтения таблицы '" + tablename + "' из базы данных");
+                LogFile.Add(Resources.LogMsgError +
+                    "ошибка чтения таблицы '" + tablename + "' из базы данных");
                 return null;
             }
             _busy = true;
@@ -151,10 +153,11 @@ namespace SmartHome
                 }
                 readData.Close();
             }
-            catch
+            catch (Exception)
             {
                 newTable = null;
-                LogFile.Add(Resources.LogMsgError + "ошибка чтения таблицы '" + tablename + "' из базы данных");
+                LogFile.Add(Resources.LogMsgError +
+                    "ошибка чтения таблицы '" + tablename + "' из базы данных");
             }
             _busy = false;
             return newTable;
@@ -196,7 +199,8 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                LogFile.Add("Ошибка записи таблицы полей '" + fields + "' в таблицу '" + tablename + "'");
+                LogFile.Add(Resources.LogMsgError +
+                    "ошибка записи таблицы полей '" + fields + "' в таблицу '" + tablename + "'");
                 return;
             }
             _busy = true;
@@ -221,7 +225,8 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                LogFile.Add("Ошибка записи таблицы полей '" + fields + "' в таблицу '" + tablename + "'");
+                LogFile.Add(Resources.LogMsgError +
+                    "ошибка записи таблицы полей '" + fields + "' в таблицу '" + tablename + "'");
             }
             _busy = false;
         } // void SaveTo(tablename, fields, data, where)

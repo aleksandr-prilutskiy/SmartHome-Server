@@ -18,7 +18,7 @@ namespace SmartHome
         public static string DatabaseUser = "root";         // Имя пользователя для подключения к базе данных
         public static string DatabasePassword;              // Пароль пользователя для подключения к базе данных
         public static string MqttBrokerAddress = "";        // Адрес брокера MQTT
-        public static int MqttBrokerPort;                   // Порт брокера MQTT
+        public static int MqttBrokerPort = 1883;            // Порт брокера MQTT
         public static string MqttUserName;                  // Имя пользователя для подключения к брокеру MQTT
         public static string MqttPassword;                  // Пароль пользователя для подключения к брокеру MQTT
         public static bool EventsLogEnable = false;         // Отображать в журнале обработку событий
@@ -39,20 +39,21 @@ namespace SmartHome
             new Mutex(true, "MY_UNIQUE_MUTEX_NAME", out isSingleInstance);
             if (!isSingleInstance)
             {
-                MessageBox.Show(Resources.AppAlreadyRunning, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Resources.AppAlreadyRunning, Resources.AppName,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AppWindow = new FormMain();
             new LogFile();
-            new MySql();
+            new MySQL();
             new nooLite();
             new Sensors();
             new Devices();
             new MQTT();
             new Events();
-            LogFile.Add("Сервер запущен");
+            LogFile.Add(Resources.StartServer);
             Devices.PingAll();
             Application.Run(AppWindow);
         } // void Main()

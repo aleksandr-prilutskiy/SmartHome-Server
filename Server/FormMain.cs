@@ -79,7 +79,6 @@ namespace SmartHome
         {
             SmartHome.Events.ChekEvents();
             SmartHome.Events.ChekShedule();
-            //SmartHome.Events.ChekScripts();
             LogFile.SaveFile();
         } // void timerEvents_Tick(sender, e)
 
@@ -116,13 +115,14 @@ namespace SmartHome
             {
                 String text = message.Remove(0, 6);
                 Color color = Color.Black;
-                if (text.Remove(0, 10).Remove(7) == "Event: ") color = Color.Green;
-                if (text.Remove(0, 10).Remove(15) == "Shedule event: ") color = Color.DarkOliveGreen;
-                if (text.Remove(0, 10).Remove(14) == "Script event: ") color = Color.DarkGreen;
-                if (text.Remove(0, 10).Remove(Resources.LogMsgError.Length) == Resources.LogMsgError) color = Color.Red;
-                if (text.Remove(0, 10).Remove(6) == "Ping: ") color = Color.Blue;
-                if (text.Remove(0, 10).Remove(9) == "nooLite: ") color = Color.DarkBlue;
-                if (text.Remove(0, 10).Remove(6) == "MQTT: ") color = Color.DeepPink;
+                String msg = text.Remove(0, 10);
+                if (msg.Remove(Resources.LogMsgEvent.Length) == Resources.LogMsgEvent) color = Color.Green;
+                if (msg.Remove(Resources.LogMsgShedule.Length) == Resources.LogMsgShedule) color = Color.DarkOliveGreen;
+                if (msg.Remove(Resources.LogMsgScript.Length) == Resources.LogMsgScript) color = Color.DarkGreen;
+                if (msg.Remove(Resources.LogMsgError.Length) == Resources.LogMsgError) color = Color.Red;
+                if (msg.Remove(Resources.LogMsgPing.Length) == Resources.LogMsgPing) color = Color.Blue;
+                if (msg.Remove(Resources.LogMsgNooLite.Length) == Resources.LogMsgNooLite) color = Color.DarkBlue;
+                if (msg.Remove(Resources.LogMsgMQTT.Length) == Resources.LogMsgMQTT) color = Color.Navy;
                 richTextBoxLog.SelectionStart = richTextBoxLog.TextLength;
                 richTextBoxLog.SelectionLength = 0;
                 richTextBoxLog.SelectionColor = color;
@@ -157,7 +157,7 @@ namespace SmartHome
             WindowState = FormWindowState.Normal;
             Devices.StopPing();
             MQTT.Disconnect();
-            MySql.Close();
+            MySQL.Close();
             IniFile.SaveConfig();
             EnableExit = true;
             Application.Exit();

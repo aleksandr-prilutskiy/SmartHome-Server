@@ -160,6 +160,60 @@ namespace SmartHome.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Event: .
+        /// </summary>
+        internal static string LogMsgEvent {
+            get {
+                return ResourceManager.GetString("LogMsgEvent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на MQTT: .
+        /// </summary>
+        internal static string LogMsgMQTT {
+            get {
+                return ResourceManager.GetString("LogMsgMQTT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на nooLite: .
+        /// </summary>
+        internal static string LogMsgNooLite {
+            get {
+                return ResourceManager.GetString("LogMsgNooLite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Ping: .
+        /// </summary>
+        internal static string LogMsgPing {
+            get {
+                return ResourceManager.GetString("LogMsgPing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Script event: .
+        /// </summary>
+        internal static string LogMsgScript {
+            get {
+                return ResourceManager.GetString("LogMsgScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Shedule event: .
+        /// </summary>
+        internal static string LogMsgShedule {
+            get {
+                return ResourceManager.GetString("LogMsgShedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap logo {
@@ -176,6 +230,15 @@ namespace SmartHome.Properties {
         internal static string NoIniFile {
             get {
                 return ResourceManager.GetString("NoIniFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сервер запущен.
+        /// </summary>
+        internal static string StartServer {
+            get {
+                return ResourceManager.GetString("StartServer", resourceCulture);
             }
         }
         

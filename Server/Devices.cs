@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Threading;
 using SmartHome.Properties;
 
 namespace SmartHome
@@ -11,35 +12,35 @@ namespace SmartHome
     class Devices
     {
 
-        public enum DeviceOption : ushort // Маски флагов свлйств устройства
+        public enum DeviceOption : ushort // Маски флагов свойств устройства
         {
-            Ping    = 0x0001,
-            OffAll  = 0x0008,
+            Ping    = 0x0001,             // Устройство может быть опрошено (ping)
+            OffAll  = 0x0008,             // Устройство входит в группу "Выключить все"
         } // enum DeviceOption
 
-        public enum DeviceType : byte // Типы устройств
+        public enum DeviceType : byte     // Типы устройств
         {
-          //Unknown = 0,    // Прочее устройство
-            Server  = 1,    // Сервер
-            NooLite = 2,    // Устройство nooLite
-          //TV      = 3,    // Телевизор
-          //CCTV    = 4,    // Камера видеонаблюдения
+          //Unknown = 0,                  // Прочее устройство
+            Server  = 1,                  // Сервер
+            NooLite = 2,                  // Устройство nooLite
+          //TV      = 3,                  // Телевизор
+          //CCTV    = 4,                  // Камера видеонаблюдения
         } // enum DeviceType
 
-        public class Device             // Запись об устройстве
+        public class Device               // Запись об устройстве
         {
-            public int Id;              // ID устройства
-            public String Name;         // Наименование устройства
-            public byte Type;           // Тип устройства
-            public String Driver;       // Имя драйвера устройства
-            public String Addr;         // Адрес устройства
-            public short Channel;       // Канал привязки (для устройств nooLite)
-            public ushort Options;      // Опции настройки устройства
-            public int State;           // Код состояния устройства
-            public Ping PingHandle;     // Указатель на объект Ping
-            public int InList;          // Индекс в таблице устройств
+            public int Id;                // ID устройства
+            public String Name;           // Наименование устройства
+            public byte Type;             // Тип устройства
+            public String Driver;         // Имя драйвера устройства
+            public String Addr;           // Адрес устройства
+            public short Channel;         // Канал привязки (для устройств nooLite)
+            public ushort Options;        // Опции настройки устройства
+            public int State;             // Код состояния устройства
+            public Ping PingHandle;       // Указатель на объект Ping
+            public int InList;            // Индекс в таблице устройств
         } // class Device
-        public static List<Device> DevicesList;
+        public static List<Device> DevicesList; // Список устройств
 
 //===============================================================================================================
 // Name...........:	Devices
@@ -60,7 +61,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void LoadTable()
         {
-            var table = MySql.ReadTable("devices", "id,name,type,driver,addr,options,parameters",
+            var table = MySQL.ReadTable("devices", "id,name,type,driver,addr,options,parameters",
                 "(options & " + (ushort)DeviceOption.Ping + ") > 0");
             if (table == null) return;
             foreach (var record in table)
@@ -102,7 +103,7 @@ namespace SmartHome
         public static void SetState(Device device, int state)
         {
             device.State = state;
-            MySql.SaveTo("devices", "state,updated", state + ",NOW()", "id = '" + device.Id + "'");
+            MySQL.SaveTo("devices", "state,updated", state + ",NOW()", "id = '" + device.Id + "'");
             Program.AppWindow.GridViewDevices[0, device.InList].Value = state > 0
                 ? Resources.green
                 : Resources.gray;
@@ -115,11 +116,11 @@ namespace SmartHome
 //===============================================================================================================
         public static void PingAll()
         {
-            nooLite.MtrfReConnect();
+            nooLite.MtrfConnect();
             MQTT.Connect();
-            Sensors.SystemMonitoring();
+            Monitoring.System();
             if (DevicesList.Count == 0) return;
-            nooLite.SendCommand(63, "readstate");
+            nooLite.SendCommand(0, "readstate");
             foreach (var device in DevicesList)
             {
                 switch (device.Type)
@@ -175,7 +176,7 @@ namespace SmartHome
                 {
                     state = 1;
                     if (Program.PingLogEnable)
-                        LogFile.Add("Ping: " + device.Addr + " .. " + e.Reply.RoundtripTime + " ms");
+                        LogFile.Add(Resources.LogMsgPing + device.Addr + " .. " + e.Reply.RoundtripTime + " ms");
                 }
                 SetState(device, state);
                 device.PingHandle = null;
@@ -203,16 +204,18 @@ namespace SmartHome
 //===============================================================================================================
         public static void TurnOffAll()
         {
-            //return;
             foreach (var device in DevicesList)
-                if ((device.Options & (ushort)DeviceOption.OffAll) > 0)
+            {
+                if ((device.State > 0) && ((device.Options & (ushort)DeviceOption.OffAll) > 0))
                 {
                     var newevent = new Events.Event();
                     newevent.Application = device.Driver;
                     newevent.Command = "off";
                     newevent.Device = device.Name;
                     HandleEvent.Execute(newevent, (byte)Events.EventMode.Script);
+                    Thread.Sleep(500);
                 }
+            }
         } // void TurnOffAll()
 
     } // class Devices

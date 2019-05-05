@@ -112,44 +112,30 @@ namespace SmartHome
         {
             _serial = new SerialPort();
             Incoming = new List<byte[]>();
+            var packet = new Byte[BufferSize];
+            for (int n = 0; n < BufferSize; n++) packet[n] = 0;
+            Incoming.Add(packet);
             _modeMtrf64 = (byte) Mode.Txf;
-            PortMtrf64 = FindPortMtrf();
-            if (PortMtrf64.Length == 0)
+            if (!FindPortMtrf())
             {
                 LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не обнаружен");
                 return;
             }
-            var packet = new Byte[BufferSize];
-            for (int n = 0; n < BufferSize; n++) packet[n] = 0;
-            Incoming.Add(packet);
-            _serial.BaudRate = 9600;
-            _serial.Parity = Parity.None;
-            _serial.StopBits = StopBits.One;
-            _serial.DataBits = 8;
-            _serial.Handshake = Handshake.None;
-            _serial.DataReceived += DataReceivedHandler;
-            _serial.Open();
-            if (_serial.IsOpen)
-            {
-                _serial.DiscardInBuffer();
-                LogFile.Add("Модуль nooLite MTRF-64-USB подключен" + PortMtrf64);
-                Program.AppWindow.pictureBoxConnectNooLite.Image = Resources.green;
-            }
-            else
-            {
-                LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не подключен");
-            }
+            MtrfConnect();
         } // void nooLite()
 
 //===============================================================================================================
 // Name...........:	FindPortMtrf
 // Description....:	Поиск порта, к которому подключен модуль nooLite MTRF-64 USB
 // Syntax.........:	FindPortMtrf()
-// Return value(s):	Success:    - возвращает номер COM-порта в виде строки, например: "COM1"
-//                  Failure:    - возвращает пустую строку
+// Return value(s):	Success:    - true, в PortMtrf64 - номер COM-порта в виде строки, например: "COM1"
+//                  Failure:    - false, в PortMtrf64 - пустая строка
 //===============================================================================================================
-        private static String FindPortMtrf()
+        private static bool FindPortMtrf()
         {
+            PortMtrf64 = "";
+            string[] portnames = SerialPort.GetPortNames();
+            if (portnames.Length == 0) return false;
             var bufferInit = new Byte[BufferSize];
             for (int i = 0; i < bufferInit.Length; i++) bufferInit[i] = 0;
             bufferInit[(byte) Tx.St] = 171;
@@ -168,7 +154,6 @@ namespace SmartHome
             _serial.DataBits = 8;
             _serial.ReadTimeout = 500;
             _serial.WriteTimeout = 500;
-            string[] portnames = SerialPort.GetPortNames();
             foreach (var portname in portnames)
             {
                 _serial.PortName = portname;
@@ -190,24 +175,54 @@ namespace SmartHome
                         for (int i = 0; i < bufferRx.Length; i++) bufferRx[i] = (byte)_serial.ReadByte();
                     _serial.Close();
                     if ((bufferRx[(byte)Rx.St] == 173) && (bufferRx[(byte)Rx.Sp] == 174) &&
-                        (bufferRx[(byte)Rx.Crc] == GetBufferCrc(bufferRx))) return portname;
+                        (bufferRx[(byte)Rx.Crc] == GetBufferCrc(bufferRx)))
+                    {
+                        PortMtrf64 = portname;
+                        return true;
+                    }
                 }
                 catch (Exception)
                 {
                     // ignored
                 }
             }
-            return "";
-        } // String FindPortMtrf()
+            return false;
+        } // bool FindPortMtrf()
 
 //===============================================================================================================
-// Name...........:	MtrfReConnect
-// Description....:	Переподключение к модулю nooLite MTRF-64 USB
-// Syntax.........:	MtrfReConnect()
+// Name...........:	MtrfConnect
+// Description....:	Подключение к модулю nooLite MTRF-64 USB
+// Syntax.........:	MtrfConnect()
 //===============================================================================================================
-        public static void MtrfReConnect()
+        public static void MtrfConnect()
         {
-        } // void MtrfReConnect()
+            if (PortMtrf64.Length > 0)
+            {
+                string[] portnames = SerialPort.GetPortNames();
+                foreach (var portname in portnames)
+                    if ((portname == PortMtrf64) && (_serial.IsOpen)) return;
+                Close();
+                Program.AppWindow.pictureBoxConnectNooLite.Image = Resources.gray;
+            }
+            if (!FindPortMtrf()) return;
+            _serial.BaudRate = 9600;
+            _serial.Parity = Parity.None;
+            _serial.StopBits = StopBits.One;
+            _serial.DataBits = 8;
+            _serial.Handshake = Handshake.None;
+            _serial.DataReceived += DataReceivedHandler;
+            _serial.Open();
+            if (_serial.IsOpen)
+            {
+                _serial.DiscardInBuffer();
+                LogFile.Add(Resources.LogMsgNooLite + "модуль nooLite MTRF-64-USB подключен к " + PortMtrf64);
+                Program.AppWindow.pictureBoxConnectNooLite.Image = Resources.green;
+            }
+            else
+            {
+                LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не подключен");
+            }
+        } // void MtrfConnect()
 
 
 //===============================================================================================================
@@ -234,8 +249,6 @@ namespace SmartHome
         public static bool SendCommand(short channel, String command, String parameters)
         {
             if ((!_serial.IsOpen) || (channel < 0) || (channel > 63)) return false;
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             var bufferTx = new Byte[17];
             for (int i = 0; i < bufferTx.Length; i++) bufferTx[i] = 0;
             bufferTx[(byte)Tx.St] = 171;
@@ -339,7 +352,9 @@ namespace SmartHome
 //===============================================================================================================
         public static void Close()
         {
-            if (_serial.IsOpen) _serial.Close();
+            if (!_serial.IsOpen) return;
+            _serial.Close();
+            PortMtrf64 = "";
         } // void Close()
 
 //===============================================================================================================
@@ -364,7 +379,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void BufferToLog(Byte[] buffer)
         {
-            String s = "nooLite: ";
+            String s = Resources.LogMsgNooLite;
             if (buffer[(byte)Tx.St] == 171) s += "OUT>>";
             else if (buffer[(byte)Tx.St] == 173) s += "IN<<";
             else
@@ -373,8 +388,7 @@ namespace SmartHome
                 LogFile.Add(s);
                 return;
             }
-            s += buffer[(byte)Tx.St].ToString() +
-                " |MODE=" + buffer[(byte)Tx.Mode].ToString() + 
+            s += "MODE=" + buffer[(byte)Tx.Mode].ToString() + 
                 "|CTR=" + buffer[(byte)Tx.Ctr].ToString() + "|";
             if (buffer[(byte)Tx.St] == 171) s += "RES=" + buffer[(byte)Tx.Res].ToString() + "|";
             if (buffer[(byte)Tx.St] == 173) s += "TOGL=" + buffer[(byte)Tx.Res].ToString() + "|";
@@ -388,8 +402,7 @@ namespace SmartHome
             s += "ID=" + buffer[(byte)Tx.Id0].ToString("X2") +
                 buffer[(byte)Tx.Id1].ToString("X2") +
                 buffer[(byte)Tx.Id2].ToString("X2") +
-                buffer[(byte)Tx.Id3].ToString("X2") + "|";
-            s += "CRC=" + buffer[(byte)Tx.Crc].ToString() + "|" + buffer[(byte)Tx.Sp].ToString() + "|";
+                buffer[(byte)Tx.Id3].ToString("X2");
             LogFile.Add(s);
         } // void BufferToLog(Byte[])
 

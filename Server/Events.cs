@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SmartHome.Properties;
 
 namespace SmartHome
 {
@@ -35,20 +36,20 @@ namespace SmartHome
 
         public class Shedule: Event     // Запись в расписании
         {
-            public byte Mode;
-            public uint Period;
-            public DateTime NextTime;
+            public byte Mode;           // Режим повторения события
+            public uint Period;         // Период повторения события (в секундах)
+            public DateTime NextTime;   // Время следующего события
         } // class Shedule
-        public static List<Shedule> SheduleList;
+        public static List<Shedule> SheduleList; // Список событий по расписанию
 
         public class Script : Event     // Запись о правиле скрипта
         {
-            public String Rules;
-            public uint Delay;
-            public uint Timeout;
-            public DateTime Timer;
+            public String Rules;        // Правило скрипта
+            public uint Delay;          // Задержка срабатывания скрипта
+            public uint Timeout;        // Таймаут перед повторным срабатыванием скрипта
+            public DateTime Timer;      // Таймер повторного срабатывания скрипта
         } // class Script
-        public static List<Script> ScriptsList;
+        public static List<Script> ScriptsList; // Список скриптов
 
 //===============================================================================================================
 // Name...........:	Events
@@ -61,7 +62,7 @@ namespace SmartHome
             ScriptsList = new List<Script>();
             LoadShedule();
             LoadScripts();
-            MySql.SaveTo("events", "status", "-1", "status = 0"); // отметки о пропущенных событиях
+            MySQL.SaveTo("events", "status", "-1", "status = 0"); // отметки о пропущенных событиях
             Program.AppWindow.timerEvents.Enabled = true;
         } // Events()
 
@@ -72,7 +73,8 @@ namespace SmartHome
 //===============================================================================================================
         public static void LoadShedule()
         {
-            var table = MySql.ReadTable("shedule");
+            var table = MySQL.ReadTable("shedule", "id,application,command,device,parameters,mode,period,next_time",
+                "enable = 1", "id ASC");
             if (table == null) return;
             foreach (var record in table)
             {
@@ -96,19 +98,20 @@ namespace SmartHome
 //===============================================================================================================
         public static void LoadScripts()
         {
-            var table = MySql.ReadTable("scripts", "*", "enable = 1", "id ASC");
+            var table = MySQL.ReadTable("scripts", "id,rules,application,command,device,parameters,delay,timeout",
+                "enable = 1", "id ASC");
             if (table == null) return;
             foreach (var record in table)
             {
                 var item = new Script();
                 if (!int.TryParse(record[0], out item.Id)) item.Id = 0;
-                item.Rules = record[2];
-                item.Application = record[3];
-                item.Command = record[4];
-                item.Device = record[5];
-                item.Parameters = record[6];
-                if (!uint.TryParse(record[8], out item.Delay)) item.Delay = 0;
-                if (!uint.TryParse(record[9], out item.Timeout)) item.Timeout = 0;
+                item.Rules = record[1];
+                item.Application = record[2];
+                item.Command = record[3];
+                item.Device = record[4];
+                item.Parameters = record[5];
+                if (!uint.TryParse(record[6], out item.Delay)) item.Delay = 0;
+                if (!uint.TryParse(record[7], out item.Timeout)) item.Timeout = 0;
                 item.Timer = DateTime.MinValue;
                 ScriptsList.Add(item);
             }
@@ -121,22 +124,23 @@ namespace SmartHome
 //===============================================================================================================
         public static void ChekEvents()
         {
-            var table = MySql.ReadTable("events", "*", "status = 0", "updated");
+            var table = MySQL.ReadTable("events", "id,application,command,device,parameters",
+                "status = 0", "updated ASC");
             if (table == null) return;
             foreach (var record in table)
             {
                 var newevent = new Event();
                 if (!int.TryParse(record[0], out newevent.Id)) newevent.Id = 0;
-                newevent.Application = record[2];
-                newevent.Command = record[3];
-                newevent.Device = record[4];
-                newevent.Parameters = record[5];
+                newevent.Application = record[1];
+                newevent.Command = record[2];
+                newevent.Device = record[3];
+                newevent.Parameters = record[4];
                 if (Program.EventsLogEnable)
-                    LogFile.Add("Event: " +
-                        newevent.Application + " " +
-                        newevent.Command + " " +
-                        newevent.Device + " " +
-                        newevent.Parameters);
+                    LogFile.Add(Resources.LogMsgEvent +
+                        (newevent.Application.Length > 0 ? newevent.Application + " " : "") +
+                        (newevent.Command.Length > 0 ? newevent.Command + " " : "") +
+                        (newevent.Device.Length > 0 ? newevent.Device + " " : "") +
+                        (newevent.Parameters.Length > 0 ? newevent.Parameters : ""));
                 HandleEvent.Execute(newevent, (byte)EventMode.Interface);
             }
         } // void ChekEvents()
@@ -152,40 +156,40 @@ namespace SmartHome
             {
                 if ((shedule.NextTime == DateTime.MinValue) || (shedule.NextTime > DateTime.Now)) continue;
                 if (Program.EventsLogEnable)
-                    LogFile.Add("Shedule event: " +
-                        shedule.Application + " " +
-                        shedule.Command + " " +
-                        shedule.Device + " " +
-                        shedule.Parameters);
-                HandleEvent.Execute(shedule, (byte)EventMode.Shedule);
+                    LogFile.Add(Resources.LogMsgShedule +
+                        (shedule.Application.Length > 0 ? shedule.Application + " " : "") +
+                        (shedule.Command.Length > 0 ? shedule.Command + " " : "") +
+                        (shedule.Device.Length > 0 ? shedule.Device + " " : "") +
+                        (shedule.Parameters.Length > 0 ? shedule.Parameters : ""));
+                HandleEvent.Execute(shedule, shedule.Id < 0 ? (byte)EventMode.Script : (byte)EventMode.Shedule);
                 switch (shedule.Mode)
                 {
-                    case (byte) SheduleMode.Once:
+                    case (byte)SheduleMode.Once:
                         shedule.NextTime = DateTime.MinValue;
                         break;
-                    case (byte) SheduleMode.Interval:
+                    case (byte)SheduleMode.Interval:
                         shedule.NextTime = shedule.NextTime.AddSeconds(shedule.Period);
                         break;
-                    case (byte) SheduleMode.Hourly:
+                    case (byte)SheduleMode.Hourly:
                         shedule.NextTime = shedule.NextTime.AddHours(1);
                         break;
-                    case (byte) SheduleMode.Daily:
+                    case (byte)SheduleMode.Daily:
                         shedule.NextTime = shedule.NextTime.AddDays(1);
                         break;
-                    case (byte) SheduleMode.Weekly:
+                    case (byte)SheduleMode.Weekly:
                         shedule.NextTime = shedule.NextTime.AddDays(7);
                         break;
-                    case (byte) SheduleMode.Monthly:
+                    case (byte)SheduleMode.Monthly:
                         shedule.NextTime = shedule.NextTime.AddMonths(1);
                         break;
-                    case (byte) SheduleMode.Yearly:
+                    case (byte)SheduleMode.Yearly:
                         shedule.NextTime = shedule.NextTime.AddYears(1);
                         break;
                 }
                 String nextime = shedule.NextTime != DateTime.MinValue 
                     ? "'" + shedule.NextTime.ToString("yyyy-MM-dd hh:mm:ss") + "'"
                     : "NULL";
-                MySql.SaveTo("shedule", "next_time", nextime, "id = '" + shedule.Id + "'");
+                MySQL.SaveTo("shedule", "next_time", nextime, "id = '" + shedule.Id + "'");
             }
         } //  ChekShedule()
 
@@ -205,12 +209,25 @@ namespace SmartHome
                 if (script.Rules.IndexOf("sensor(" + sensor.Topic + ")", StringComparison.Ordinal) < 0) continue;
                 if (!HandleEvent.ChekLexeme(HandleEvent.ReplaceExpressions(script.Rules))) continue;
                 if (Program.EventsLogEnable)
-                    LogFile.Add("Script event: " +
-                        script.Application + " " +
-                        script.Command + " " +
-                        script.Device + " " +
-                        script.Parameters);
-                HandleEvent.Execute(script, (byte)EventMode.Script);
+                    LogFile.Add(Resources.LogMsgScript +
+                        (script.Application.Length > 0 ? script.Application + " " : "") +
+                        (script.Command.Length > 0 ? script.Command + " " : "") +
+                        (script.Device.Length > 0 ? script.Device + " " : "") +
+                        (script.Parameters.Length > 0 ? script.Parameters : ""));
+                if (script.Delay > 0)
+                {
+                    var item = new Shedule();
+                    item.Id = -1;
+                    item.Application = script.Application;
+                    item.Command = script.Command;
+                    item.Device = script.Device;
+                    item.Parameters = script.Parameters;
+                    item.Mode = (byte)SheduleMode.Once;
+                    item.Period = 0;
+                    item.NextTime = DateTime.Now.AddSeconds(script.Delay);
+                    SheduleList.Add(item);
+                }
+                else HandleEvent.Execute(script, (byte)EventMode.Script);
                 script.Timer = DateTime.Now.AddSeconds(script.Timeout);
             }
         } //  ChekScripts()

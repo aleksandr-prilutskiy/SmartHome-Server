@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management;
 
 namespace SmartHome
 {
-    // Объект для работы с датчиками "Умного дрма"
+    // Объект для работы с датчиками "Умного дома"
     public class Sensors
     {
 
-        public class Sensor         // Запись о датчике
+        public class Sensor                     // Запись о датчике
         {
-            public uint Id;         // ID датчика
-            public String Topic;    // Топик MQTT
-            public String Name;     // Наименование датчика
-            public String Value;    // Показания датчика
-            public int InList;      // Индекс в таблице датчиков
+            public uint Id;                     // ID датчика
+            public String Topic;                // Топик MQTT
+            public String Name;                 // Наименование датчика
+            public String Value;                // Показания датчика
+            public int InList;                  // Индекс в таблице датчиков
         } // class Sensor
-        public static List<Sensor> SensorsList;
+        public static List<Sensor> SensorsList; // Список датчиков
 
 //===============================================================================================================
 // Name...........:	Sensors
@@ -37,7 +36,7 @@ namespace SmartHome
 //===============================================================================================================
         public static void LoadTable()
         {
-            var table = MySql.ReadTable("sensors");
+            var table = MySQL.ReadTable("sensors");
             if (table == null) return;
             foreach (var record in table)
             {
@@ -64,29 +63,6 @@ namespace SmartHome
         } // Sensor Find(name)
 
 //===============================================================================================================
-// Name...........:	SystemMonitoring
-// Description....:	Мониторинг системных ресурсов
-// Syntax.........:	SystemMonitoring()
-//===============================================================================================================
-        public static void SystemMonitoring()
-        {
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher("Select * FROM WIN32_Processor");
-            ManagementObjectCollection mObject = searcher.Get();
-            foreach (var item in mObject)
-            {
-                var obj = (ManagementObject)item;
-                SaveToDatabase("cpu_load", obj["LoadPercentage"].ToString());
-            }
-            searcher = new ManagementObjectSearcher("Select * FROM Win32_OperatingSystem");
-            mObject = searcher.Get();
-            foreach (var item in mObject)
-            {
-                var obj = (ManagementObject)item;
-                SaveToDatabase("ram_free", obj["TotalVisibleMemorySize"].ToString());
-            }
-        } // void SystemMonitoring()
-
-//===============================================================================================================
 // Name...........:	SaveToDatabase
 // Description....:	Сохранение показаний датчика в базу данных
 // Syntax.........:	SaveToDatabase(topic, value)
@@ -109,8 +85,8 @@ namespace SmartHome
 //===============================================================================================================
         public static void SaveToDatabase(Sensor sensor)
         {
-            MySql.SaveTo("sensors_data", "sensor,value,status", "'" + sensor.Topic + "','" + sensor.Value + "','0'");
-            MySql.SaveTo("sensors", "value", sensor.Value, "topic = '" + sensor.Topic + "'");
+            MySQL.SaveTo("sensors_data", "sensor,value,status", "'" + sensor.Topic + "','" + sensor.Value + "','0'");
+            MySQL.SaveTo("sensors", "value", sensor.Value, "topic = '" + sensor.Topic + "'");
             Program.AppWindow.GridViewSensors[2, sensor.InList].Value = sensor.Value;
             Program.AppWindow.GridViewSensors[3, sensor.InList].Value = DateTime.Now.ToString("HH:mm:ss");
             Events.ChekScripts(sensor);

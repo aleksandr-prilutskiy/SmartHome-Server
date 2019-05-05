@@ -53,8 +53,8 @@ namespace SmartHome
                 IniFile.WriteString("Database", "Name", Program.DatabaseName);
                 IniFile.WriteString("Database", "User", Program.DatabaseUser);
                 IniFile.WriteString("Database", "Password", Program.DatabasePassword);
-                MySql.Close();
-                MySql.Connect();
+                MySQL.Close();
+                MySQL.Connect();
             }
             if ((textBoxMQTTBrokerAddr.Text != Program.MqttBrokerAddress) ||
                 (textBoxMQTTBrokerPort.Text != Program.MqttBrokerPort.ToString()) ||

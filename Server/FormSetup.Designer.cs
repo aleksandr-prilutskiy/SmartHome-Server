@@ -35,6 +35,7 @@
             this.tabPageGeneral = new System.Windows.Forms.TabPage();
             this.checkBoxStartMinimized = new System.Windows.Forms.CheckBox();
             this.tabPageMySQL = new System.Windows.Forms.TabPage();
+            this.labelMySQLServerPortNote = new System.Windows.Forms.Label();
             this.textBoxMySQLServerPort = new System.Windows.Forms.TextBox();
             this.labelMySQLServerPort = new System.Windows.Forms.Label();
             this.labelMySQLPassword = new System.Windows.Forms.Label();
@@ -59,7 +60,7 @@
             this.checkBoxEventsToLog = new System.Windows.Forms.CheckBox();
             this.buttonSave = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
-            this.labelMySQLServerPortNote = new System.Windows.Forms.Label();
+            this.labelMQTTBrokerPortNote = new System.Windows.Forms.Label();
             this.tabControlSetup.SuspendLayout();
             this.tabPageGeneral.SuspendLayout();
             this.tabPageMySQL.SuspendLayout();
@@ -138,6 +139,15 @@
             this.tabPageMySQL.TabIndex = 1;
             this.tabPageMySQL.Text = "База данных";
             this.tabPageMySQL.UseVisualStyleBackColor = true;
+            // 
+            // labelMySQLServerPortNote
+            // 
+            this.labelMySQLServerPortNote.Location = new System.Drawing.Point(190, 39);
+            this.labelMySQLServerPortNote.Name = "labelMySQLServerPortNote";
+            this.labelMySQLServerPortNote.Size = new System.Drawing.Size(120, 15);
+            this.labelMySQLServerPortNote.TabIndex = 10;
+            this.labelMySQLServerPortNote.Text = "(по умолчанию = 3306)";
+            this.labelMySQLServerPortNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBoxMySQLServerPort
             // 
@@ -222,6 +232,7 @@
             // 
             // tabPageMQTT
             // 
+            this.tabPageMQTT.Controls.Add(this.labelMQTTBrokerPortNote);
             this.tabPageMQTT.Controls.Add(this.textBoxMQTTBrokerPort);
             this.tabPageMQTT.Controls.Add(this.labelMQTTBrokerPort);
             this.tabPageMQTT.Controls.Add(this.labelMQTTBrokerPassword);
@@ -241,7 +252,7 @@
             // 
             this.textBoxMQTTBrokerPort.Location = new System.Drawing.Point(105, 36);
             this.textBoxMQTTBrokerPort.Name = "textBoxMQTTBrokerPort";
-            this.textBoxMQTTBrokerPort.Size = new System.Drawing.Size(196, 20);
+            this.textBoxMQTTBrokerPort.Size = new System.Drawing.Size(80, 20);
             this.textBoxMQTTBrokerPort.TabIndex = 19;
             // 
             // labelMQTTBrokerPort
@@ -353,14 +364,14 @@
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
-            // labelMySQLServerPortNote
+            // labelMQTTBrokerPortNote
             // 
-            this.labelMySQLServerPortNote.Location = new System.Drawing.Point(190, 39);
-            this.labelMySQLServerPortNote.Name = "labelMySQLServerPortNote";
-            this.labelMySQLServerPortNote.Size = new System.Drawing.Size(120, 15);
-            this.labelMySQLServerPortNote.TabIndex = 10;
-            this.labelMySQLServerPortNote.Text = "(по умолчанию = 3306)";
-            this.labelMySQLServerPortNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labelMQTTBrokerPortNote.Location = new System.Drawing.Point(190, 39);
+            this.labelMQTTBrokerPortNote.Name = "labelMQTTBrokerPortNote";
+            this.labelMQTTBrokerPortNote.Size = new System.Drawing.Size(120, 15);
+            this.labelMQTTBrokerPortNote.TabIndex = 20;
+            this.labelMQTTBrokerPortNote.Text = "(по умолчанию = 1883)";
+            this.labelMQTTBrokerPortNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // FormSetup
             // 
@@ -420,5 +431,6 @@
         private System.Windows.Forms.TextBox textBoxMQTTBrokerAddr;
         private System.Windows.Forms.Label labelMQTTBrokerAddr;
         private System.Windows.Forms.Label labelMySQLServerPortNote;
+        private System.Windows.Forms.Label labelMQTTBrokerPortNote;
     }
 }

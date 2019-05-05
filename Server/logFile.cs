@@ -13,9 +13,9 @@ namespace SmartHome
     {
         private const string LogFileName = "SmartHomeServer.log"; // Имя файла журнала
         private const string LogSubDir = "logs";                  // Подкаталог log-файлов
-        private static string _fileName;
-        private static List<String> _buffer;
-        private static bool _busy;
+        private static string _fileName;                          // Имя файла журнала с полным путем
+        private static List<String> _buffer;                      // Буфер отложеной записи в файл журнала
+        private static bool _busy;                                // Признак захвата потока вывода в файл
 
 //===============================================================================================================
 // Name...........:	LogFile
@@ -35,7 +35,8 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                MessageBox.Show(Resources.LogFileCreateError, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Resources.LogFileCreateError, Resources.AppName,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -120,7 +121,8 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                Program.AppWindow.WriteToLog(Resources.LogMsgError + "файл '" + LogFileName + "' не может быть прочитан");
+                Program.AppWindow.WriteToLog(Resources.LogMsgError +
+                    "файл '" + LogFileName + "' не может быть прочитан");
                 return;
             }
             _busy = true;
@@ -133,7 +135,8 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                Program.AppWindow.WriteToLog(Resources.LogMsgError + "ошибка чтения из файла '" + LogFileName  + "'");
+                Program.AppWindow.WriteToLog(Resources.LogMsgError +
+                    "ошибка чтения из файла '" + LogFileName  + "'");
             }
             finally
             {

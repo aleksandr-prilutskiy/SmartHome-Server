@@ -165,4 +165,25 @@
   <data name="LogMsgError" xml:space="preserve">
     <value>Error: </value>
   </data>
+  <data name="LogMsgEvent" xml:space="preserve">
+    <value>Event: </value>
+  </data>
+  <data name="LogMsgMQTT" xml:space="preserve">
+    <value>MQTT: </value>
+  </data>
+  <data name="LogMsgNooLite" xml:space="preserve">
+    <value>nooLite: </value>
+  </data>
+  <data name="LogMsgPing" xml:space="preserve">
+    <value>Ping: </value>
+  </data>
+  <data name="LogMsgScript" xml:space="preserve">
+    <value>Script event: </value>
+  </data>
+  <data name="LogMsgShedule" xml:space="preserve">
+    <value>Shedule event: </value>
+  </data>
+  <data name="StartServer" xml:space="preserve">
+    <value>Сервер запущен</value>
+  </data>
 </root>

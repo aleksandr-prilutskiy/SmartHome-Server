@@ -3,7 +3,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace SmartHome
+namespace LgTv
 {
     // Объект для работы с файлом конфигурации программы
     class IniFile
@@ -24,41 +24,12 @@ namespace SmartHome
                 _fileName = "";
                 return;
             }
-            Program.AppWindowPosX     = ReadInt("Window", "Pos_X", 0);
-            Program.AppWindowPosY     = ReadInt("Window", "Pos_Y", 0);
-            Program.AppWindowWidth    = ReadInt("Window", "Size_X", 450);
-            Program.AppWindowHeight   = ReadInt("Window", "Size_Y", 300);
             Program.DatabaseAddress   = ReadString("Database", "Host", Program.DatabaseAddress);
             Program.DatabasePort      = ReadInt("Database", "Port", Program.DatabasePort);
             Program.DatabaseName      = ReadString("Database", "Name", Program.DatabaseName);
             Program.DatabaseUser      = ReadString("Database", "User", Program.DatabaseUser);
             Program.DatabasePassword  = ReadString("Database", "Password", Program.DatabasePassword);
-            Program.MqttBrokerAddress = ReadString("MQTT", "Host", Program.MqttBrokerAddress);
-            Program.MqttBrokerPort    = ReadInt("MQTT", "Port", 1883);
-            Program.MqttUserName      = ReadString("MQTT", "User", "");
-            Program.MqttPassword      = ReadString("MQTT", "Password", "");
-            Program.EventsLogEnable   = ReadBool("Log", "Events", false);
-            Program.PingLogEnable     = ReadBool("Log", "Ping", false);
-            Program.NooLiteLogEnable  = ReadBool("Log", "nooLite", false);
-            Program.MqttLogEnable     = ReadBool("Log", "MQTT", false);
     } // void ReadConfig()
-
-//===============================================================================================================
-// Name...........:	SaveConfig
-// Description....:	Запись настроек программы в файл конфигурации
-// Syntax.........:	SaveConfig()
-//===============================================================================================================
-    public static void SaveConfig()
-        {
-            WriteString("Window", "Pos_X", Program.AppWindow.Location.X.ToString());
-            WriteString("Window", "Pos_Y", Program.AppWindow.Location.Y.ToString());
-            WriteString("Window", "Size_X", Program.AppWindow.Size.Width.ToString());
-            WriteString("Window", "Size_Y", Program.AppWindow.Size.Height.ToString());
-            WriteString("Log", "Events", Program.EventsLogEnable.ToString());
-            WriteString("Log", "Ping", Program.PingLogEnable.ToString());
-            WriteString("Log", "nooLite", Program.NooLiteLogEnable.ToString());
-            WriteString("Log", "MQTT", Program.MqttLogEnable.ToString());
-        } // void saveConfig()
 
 //===============================================================================================================
 // Name...........:	ReadString
@@ -115,28 +86,9 @@ namespace SmartHome
             return ReadString(section, key, value.ToString()) == true.ToString();
         } // string ReadBool(section, key, value)
 
-//===============================================================================================================
-// Name...........:	WriteString
-// Description....:	Запись строки в файл конфигурации программы
-// Syntax.........:	WriteString(section, key, value)
-// Parameters.....:	section     - имя секции в ini-файле
-//                  key         - имя параметра в ini-файле
-//                  value       - значение параметра
-//===============================================================================================================
-        public static void WriteString(string section, string key, string value)
-        {
-            String newFileName = _fileName != "" 
-                ? _fileName
-                : AppDomain.CurrentDomain.BaseDirectory + IniFileName;
-            WritePrivateProfileString(section, key, value, newFileName);
-        } // void WriteString(section, key, value)
-
         [DllImport("kernel32")]
         private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal,
             int size, string filePath);
 
-        [DllImport("kernel32")]
-        private static extern int WritePrivateProfileString(string section, string key, string str, string filePath);
-
     } // class IniFile
-} // namespace SmartHome
+} // namespace LgTv

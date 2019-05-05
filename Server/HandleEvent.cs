@@ -56,9 +56,9 @@ namespace SmartHome
                             }
                             status = true;
                             break;
-                        //case "turn off all":
-                            //Devices.TurnOffAll();
-                            //break;
+                        case "alloff":
+                            Devices.TurnOffAll();
+                            break;
                     }
                     break;
                 case "nooLite":
@@ -71,7 +71,7 @@ namespace SmartHome
                     break;
             }
             if (mode == (byte)Events.EventMode.Interface)
-                MySql.SaveTo("events", "status", status.ToString(), "id = '" + newevent.Id + "'");
+                MySQL.SaveTo("events", "status", status.ToString(), "id = '" + newevent.Id + "'");
         } // void Execute(newevent, mode)
 
 //===============================================================================================================
@@ -83,21 +83,22 @@ namespace SmartHome
 //===============================================================================================================
         public static bool ExecuteFile(Events.Event newevent)
         {
+            if (newevent.Application == null) return false;
             string exeFile = AppDomain.CurrentDomain.BaseDirectory + UtilsSubDir + "\\" + newevent.Application + ".exe";
             if (!File.Exists(exeFile))
             {
                 LogFile.Add(Resources.LogMsgError + "файл " + exeFile + " - не найден");
-                MySql.SaveTo("events", "status", "-1", "id = '" + newevent.Id + "'");
+                MySQL.SaveTo("events", "status", "-1", "id = '" + newevent.Id + "'");
                 return false;
             }
             Process iStartProcess = new Process();
             iStartProcess.StartInfo.FileName = exeFile;
             iStartProcess.StartInfo.Arguments = "";
-            if (newevent.Command.Length > 0)
+            if ((newevent.Command != null) && (newevent.Command.Length > 0))
                 iStartProcess.StartInfo.Arguments += " " + newevent.Command;
-            if (newevent.Device.Length > 0)
+            if ((newevent.Device != null) && (newevent.Device.Length > 0))
                 iStartProcess.StartInfo.Arguments += " " + newevent.Device;
-            if (newevent.Parameters.Length > 0)
+            if ((newevent.Parameters != null) && (newevent.Parameters.Length > 0))
                 iStartProcess.StartInfo.Arguments += " " + ReplaceExpressions(newevent.Parameters);
             if (iStartProcess.Start()) return true;
             return false;
