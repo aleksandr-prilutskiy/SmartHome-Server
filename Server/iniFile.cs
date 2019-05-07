@@ -28,6 +28,7 @@ namespace SmartHome
             Program.AppWindowPosY     = ReadInt("Window", "Pos_Y", 0);
             Program.AppWindowWidth    = ReadInt("Window", "Size_X", 450);
             Program.AppWindowHeight   = ReadInt("Window", "Size_Y", 300);
+            Program.StartMinimized    = ReadBool("App", "StartMinimized", false);
             Program.DatabaseAddress   = ReadString("Database", "Host", Program.DatabaseAddress);
             Program.DatabasePort      = ReadInt("Database", "Port", Program.DatabasePort);
             Program.DatabaseName      = ReadString("Database", "Name", Program.DatabaseName);
@@ -54,10 +55,6 @@ namespace SmartHome
             WriteString("Window", "Pos_Y", Program.AppWindow.Location.Y.ToString());
             WriteString("Window", "Size_X", Program.AppWindow.Size.Width.ToString());
             WriteString("Window", "Size_Y", Program.AppWindow.Size.Height.ToString());
-            WriteString("Log", "Events", Program.EventsLogEnable.ToString());
-            WriteString("Log", "Ping", Program.PingLogEnable.ToString());
-            WriteString("Log", "nooLite", Program.NooLiteLogEnable.ToString());
-            WriteString("Log", "MQTT", Program.MqttLogEnable.ToString());
         } // void saveConfig()
 
 //===============================================================================================================

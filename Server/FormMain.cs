@@ -21,6 +21,12 @@ namespace SmartHome
         public FormMain()
         {
             InitializeComponent();
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+            labelAbout.Text = String.Format(Resources.AboutText, info.FileVersion);
+        } // FormMain()
+
+        private void FormMain_Load(object sender, EventArgs e)
+        {
             IniFile.ReadConfig();
             Size resolution = Screen.PrimaryScreen.Bounds.Size;
             if (Program.AppWindowPosX + Program.AppWindowWidth > resolution.Width)
@@ -29,11 +35,16 @@ namespace SmartHome
                 Program.AppWindowPosY = resolution.Height - Program.AppWindowHeight;
             Location = new Point(Math.Max(Program.AppWindowPosX, 0), Math.Max(Program.AppWindowPosY, 0));
             Size = new Size(Program.AppWindowWidth, Program.AppWindowHeight);
-            FileVersionInfo info = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
-            labelAbout.Text = String.Format(Resources.AboutText, info.FileVersion);
+            if (Program.StartMinimized)
+            {
+                WindowState = FormWindowState.Minimized;
+                OnSizeChanged(null);
+            }
             notifyIcon.ContextMenuStrip = contextMenuTray;
+            pictureAppLogo.Location = new Point((tabPageAbout.Width - pictureAppLogo.Width) / 2, 10);
+            labelAbout.Location = new Point((tabPageAbout.Width - labelAbout.Width) / 2, 110);
             EnableExit = false;
-        } // FormMain()
+        } // void FormMain_Load()
 
         protected override sealed void OnSizeChanged(EventArgs e)
         {
@@ -50,8 +61,10 @@ namespace SmartHome
                 ShowInTaskbar = true;
                 GridViewDevicesColumnName.Width = Width - 170;
                 GridViewSensorsColumnName.Width = Width - 290;
+                pictureAppLogo.Location = new Point((tabPageAbout.Width - pictureAppLogo.Width) / 2, 10);
+                labelAbout.Location = new Point((tabPageAbout.Width - labelAbout.Width) / 2, 110);
             }
-        } // void OnSizeChanged(e)
+        } // void OnSizeChanged()
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -62,41 +75,36 @@ namespace SmartHome
                 return;
             }
             timerEvents.Enabled = false;
-        } // void FormMain_FormClosing(sender, e)
+        } // void FormMain_FormClosing()
 
         private void DataGridViewDevicesClick(object sender, DataGridViewCellEventArgs e)
         {
             var txt = GridViewDevices[1, e.RowIndex].Value.ToString();
             MessageBox.Show(txt, Resources.AppName, MessageBoxButtons.OK);
-        } // void DataGridViewDevicesClick(sender, e)
+        } // void DataGridViewDevicesClick()
 
         private void timerPing_Tick(object sender, EventArgs e)
         {
             Devices.PingAll();
-        } // void timerPing_Tick(sender, e)
+        } // void timerPing_Tick()
 
         private void timerEvents_Tick(object sender, EventArgs e)
         {
             SmartHome.Events.ChekEvents();
             SmartHome.Events.ChekShedule();
             LogFile.SaveFile();
-        } // void timerEvents_Tick(sender, e)
+        } // void timerEvents_Tick()
 
         private void tabControl_Selected(object sender, TabControlEventArgs e)
         {
             var control = sender as TabControl;
             if (control == null) return;
-            if (control.SelectedTab == tabPageAbout)
-            {
-                pictureAppLogo.Location = new Point((tabControl.Width - pictureAppLogo.Width) / 2, 10);
-                labelAbout.Width = tabPageAbout.Width - 12;
-            }
-            else if (control.SelectedTab == tabPageLog)
+            if (control.SelectedTab == tabPageLog)
             {
                 richTextBoxLog.Clear();
                 LogFile.LoadFile();
             }
-        } // void tabControl_Selected(sender, e)
+        } // void tabControl_Selected()
 
         public void WriteToLog(string message)
         {
@@ -143,12 +151,12 @@ namespace SmartHome
             var setupForm = new FormSetup();
             setupForm.Owner = this;
             setupForm.ShowDialog();
-        }
+        } // buttonSetup_Click()
 
         private void toolTrayMenuItemOpen_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Normal;
-        } // void toolTrayMenuItemOpen_Click
+        } // void toolTrayMenuItemOpen_Click()
 
         private void toolTrayMenuItemExit_Click(object sender, EventArgs e)
         {

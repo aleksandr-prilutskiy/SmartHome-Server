@@ -132,18 +132,19 @@
             // 
             // labelAbout
             // 
-            this.labelAbout.Location = new System.Drawing.Point(5, 117);
+            this.labelAbout.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.labelAbout.Location = new System.Drawing.Point(10, 110);
             this.labelAbout.Name = "labelAbout";
-            this.labelAbout.Size = new System.Drawing.Size(418, 114);
+            this.labelAbout.Size = new System.Drawing.Size(400, 100);
             this.labelAbout.TabIndex = 1;
             this.labelAbout.Text = "labelAbout";
             this.labelAbout.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // pictureAppLogo
             // 
-            this.pictureAppLogo.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.pictureAppLogo.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pictureAppLogo.Image = global::SmartHome.Properties.Resources.logo;
-            this.pictureAppLogo.Location = new System.Drawing.Point(168, 6);
+            this.pictureAppLogo.Location = new System.Drawing.Point(10, 10);
             this.pictureAppLogo.Name = "pictureAppLogo";
             this.pictureAppLogo.Size = new System.Drawing.Size(96, 96);
             this.pictureAppLogo.TabIndex = 2;
@@ -404,6 +405,7 @@
             this.Name = "FormMain";
             this.Text = "SmartHome Server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
+            this.Load += new System.EventHandler(this.FormMain_Load);
             this.contextMenuTray.ResumeLayout(false);
             this.tabPageAbout.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureAppLogo)).EndInit();

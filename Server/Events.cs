@@ -187,7 +187,7 @@ namespace SmartHome
                         break;
                 }
                 String nextime = shedule.NextTime != DateTime.MinValue 
-                    ? "'" + shedule.NextTime.ToString("yyyy-MM-dd hh:mm:ss") + "'"
+                    ? "'" + shedule.NextTime.ToString("yyyy-MM-dd HH:mm:ss") + "'"
                     : "NULL";
                 MySQL.SaveTo("shedule", "next_time", nextime, "id = '" + shedule.Id + "'");
             }

@@ -77,6 +77,11 @@ namespace SmartHome
             Program.PingLogEnable = checkBoxPingToLog.Checked;
             Program.NooLiteLogEnable = checkBoxNooLiteToLog.Checked;
             Program.MqttLogEnable = checkBoxMqttToLog.Checked;
+            IniFile.WriteString("App", "StartMinimized", Program.StartMinimized.ToString());
+            IniFile.WriteString("Log", "Events", Program.EventsLogEnable.ToString());
+            IniFile.WriteString("Log", "Ping", Program.PingLogEnable.ToString());
+            IniFile.WriteString("Log", "nooLite", Program.NooLiteLogEnable.ToString());
+            IniFile.WriteString("Log", "MQTT", Program.MqttLogEnable.ToString());
             Hide();
         } // void buttonSave_Click()
 
