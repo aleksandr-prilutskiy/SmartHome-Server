@@ -45,6 +45,7 @@ namespace SmartHome
             }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            IniFile.ReadConfig();
             AppWindow = new FormMain();
             new LogFile();
             new MySQL();

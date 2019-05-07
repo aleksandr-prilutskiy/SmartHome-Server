@@ -27,7 +27,6 @@ namespace SmartHome
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            IniFile.ReadConfig();
             Size resolution = Screen.PrimaryScreen.Bounds.Size;
             if (Program.AppWindowPosX + Program.AppWindowWidth > resolution.Width)
                 Program.AppWindowPosX = resolution.Width - Program.AppWindowWidth;
