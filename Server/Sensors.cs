@@ -86,7 +86,8 @@ namespace SmartHome
         public static void SaveToDatabase(Sensor sensor)
         {
             MySQL.SaveTo("sensors_data", "sensor,value,status", "'" + sensor.Topic + "','" + sensor.Value + "','0'");
-            MySQL.SaveTo("sensors", "value", sensor.Value, "topic = '" + sensor.Topic + "'");
+            MySQL.SaveTo("sensors", "value, updated", "'" + sensor.Value + "','" +
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "'", "topic = '" + sensor.Topic + "'");
             Program.AppWindow.GridViewSensors[2, sensor.InList].Value = sensor.Value;
             Program.AppWindow.GridViewSensors[3, sensor.InList].Value = DateTime.Now.ToString("HH:mm:ss");
             Events.ChekScripts(sensor);

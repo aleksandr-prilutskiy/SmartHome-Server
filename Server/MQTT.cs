@@ -63,13 +63,13 @@ namespace SmartHome
                 if ((_client != null) && (_client.IsConnected))
                 {
                     SubscribeToAll();
-                    LogFile.Add(Resources.LogMsgMQTT + "установлено подключение к брокеру MQTT: " +
+                    LogFile.Add("@" + Resources.LogMsgMQTT + "установлено подключение к брокеру MQTT: " +
                         Program.MqttBrokerAddress + ":" + Program.MqttBrokerPort.ToString());
                     Program.AppWindow.pictureBoxConnectMQTT.Image = Resources.green;
                 }
                 else
                 {
-                    LogFile.Add(Resources.LogMsgError + "ошибка подключения к брокеру MQTT");
+                    LogFile.Add("@" + Resources.LogMsgError + "ошибка подключения к брокеру MQTT");
                     Program.AppWindow.pictureBoxConnectMQTT.Image = Resources.gray;
                 }
             }
@@ -98,7 +98,7 @@ namespace SmartHome
             if (sensor == null) return;
             sensor.Value = Encoding.UTF8.GetString(message);
             Sensors.SaveToDatabase(sensor);
-            if (Program.MqttLogEnable) LogFile.Add(Resources.LogMsgMQTT + sensor.Topic + " = " + sensor.Value);
+            if (Program.MqttLogEnable) LogFile.Add("@" + Resources.LogMsgMQTT + sensor.Topic + " = " + sensor.Value);
         } // void MsgPublishReceived(sender, e)
 
 //===============================================================================================================

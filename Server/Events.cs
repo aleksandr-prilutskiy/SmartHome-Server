@@ -141,7 +141,7 @@ namespace SmartHome
                         (newevent.Command.Length > 0 ? newevent.Command + " " : "") +
                         (newevent.Device.Length > 0 ? newevent.Device + " " : "") +
                         (newevent.Parameters.Length > 0 ? newevent.Parameters : ""));
-                HandleEvent.Execute(newevent, (byte)EventMode.Interface);
+                HandleEvent.Execute(newevent);
             }
         } // void ChekEvents()
 

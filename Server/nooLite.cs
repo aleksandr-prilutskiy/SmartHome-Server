@@ -118,7 +118,7 @@ namespace SmartHome
             _modeMtrf64 = (byte) Mode.Txf;
             if (!FindPortMtrf())
             {
-                LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не обнаружен");
+                LogFile.Add("@" + Resources.LogMsgError + "модуль nooLite MTRF-64-USB не обнаружен");
                 return;
             }
             MtrfConnect();
@@ -215,12 +215,12 @@ namespace SmartHome
             if (_serial.IsOpen)
             {
                 _serial.DiscardInBuffer();
-                LogFile.Add(Resources.LogMsgNooLite + "модуль nooLite MTRF-64-USB подключен к " + PortMtrf64);
+                LogFile.Add("@" + Resources.LogMsgNooLite + "модуль nooLite MTRF-64-USB подключен к " + PortMtrf64);
                 Program.AppWindow.pictureBoxConnectNooLite.Image = Resources.green;
             }
             else
             {
-                LogFile.Add(Resources.LogMsgError + "модуль nooLite MTRF-64-USB не подключен");
+                LogFile.Add("@" + Resources.LogMsgError + "модуль nooLite MTRF-64-USB не подключен");
             }
         } // void MtrfConnect()
 

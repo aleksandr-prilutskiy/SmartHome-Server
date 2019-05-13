@@ -48,12 +48,12 @@ namespace SmartHome
             }
             if (Connection == null)
             {
-                LogFile.Add(Resources.DatabaseConnectError);
+                LogFile.Add("@" + Resources.DatabaseConnectError);
                 Program.AppWindow.pictureBoxConnectMySQL.Image = Resources.gray;
             }
             else
             {
-                LogFile.Add(Resources.DatabaseConnected);
+                LogFile.Add("@" + Resources.DatabaseConnected);
                 Program.AppWindow.pictureBoxConnectMySQL.Image = Resources.green;
             }
             _busy = false;
@@ -128,7 +128,7 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                LogFile.Add(Resources.LogMsgError +
+                LogFile.Add("@" + Resources.LogMsgError +
                     "ошибка чтения таблицы '" + tablename + "' из базы данных");
                 return null;
             }
@@ -156,7 +156,7 @@ namespace SmartHome
             catch (Exception)
             {
                 newTable = null;
-                LogFile.Add(Resources.LogMsgError +
+                LogFile.Add("@" + Resources.LogMsgError +
                     "ошибка чтения таблицы '" + tablename + "' из базы данных");
             }
             _busy = false;
@@ -199,7 +199,7 @@ namespace SmartHome
             stopWatch.Stop();
             if (_busy)
             {
-                LogFile.Add(Resources.LogMsgError +
+                LogFile.Add("@" + Resources.LogMsgError +
                     "ошибка записи таблицы полей '" + fields + "' в таблицу '" + tablename + "'");
                 return;
             }
@@ -225,7 +225,7 @@ namespace SmartHome
             }
             catch (Exception)
             {
-                LogFile.Add(Resources.LogMsgError +
+                LogFile.Add("@" + Resources.LogMsgError +
                     "ошибка записи таблицы полей '" + fields + "' в таблицу '" + tablename + "'");
             }
             _busy = false;

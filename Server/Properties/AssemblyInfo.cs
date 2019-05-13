@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SmartHome Server")]
-[assembly: AssemblyDescription("Build 07.05.2019")]
+[assembly: AssemblyDescription("Build 13.05.2019")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SmartHome Server Application")]

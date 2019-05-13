@@ -25,6 +25,7 @@ namespace SmartHome
         public static bool PingLogEnable = false;           // Отображать в журнале опрос состояния устройств
         public static bool NooLiteLogEnable = false;        // Отображать в журнале обмен с nooLite MTRF-64-USB
         public static bool MqttLogEnable = false;           // Отображать в журнале данные от брокера MQTT
+        public static bool ScriptsDebug = false;            // Отладка выполнения скриптов
 
         public static FormMain AppWindow;
 
@@ -54,7 +55,7 @@ namespace SmartHome
             new Devices();
             new MQTT();
             new Events();
-            LogFile.Add(Resources.StartServer);
+            LogFile.Add("@" + Resources.StartServer);
             Devices.PingAll();
             Application.Run(AppWindow);
         } // void Main()

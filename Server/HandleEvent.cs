@@ -18,6 +18,16 @@ namespace SmartHome
 //===============================================================================================================
 // Name...........:	Execute
 // Description....:	Обработка события
+// Syntax.........:	Execute(newevent)
+//===============================================================================================================
+        public static void Execute(Events.Event newevent)
+        {
+            Execute(newevent, (byte)Events.EventMode.Interface);
+        } // void Execute(newevent)
+
+//===============================================================================================================
+// Name...........:	Execute
+// Description....:	Обработка события
 // Syntax.........:	Execute(newevent, mode)
 //===============================================================================================================
         public static void Execute(Events.Event newevent, byte mode)
@@ -71,7 +81,19 @@ namespace SmartHome
                     break;
             }
             if (mode == (byte)Events.EventMode.Interface)
-                MySQL.SaveTo("events", "status", status.ToString(), "id = '" + newevent.Id + "'");
+            {
+                MySQL.SaveTo("events", "status", status ? "1" : "-2", "id = '" + newevent.Id + "'");
+            }
+            else
+            {
+                MySQL.SaveTo("events", "type,application,command,device,parameters,status",
+                    "'" + mode.ToString() + "'," +
+                    "'" + newevent.Application + "'," +
+                    "'" + newevent.Command + "'," +
+                    "'" + newevent.Device + "'," +
+                    "'" + newevent.Parameters + "'," +
+                    (status ? "1" : "-2"));
+            }
         } // void Execute(newevent, mode)
 
 //===============================================================================================================
@@ -87,7 +109,7 @@ namespace SmartHome
             string exeFile = AppDomain.CurrentDomain.BaseDirectory + UtilsSubDir + "\\" + newevent.Application + ".exe";
             if (!File.Exists(exeFile))
             {
-                LogFile.Add(Resources.LogMsgError + "файл " + exeFile + " - не найден");
+                LogFile.Add("@" + Resources.LogMsgError + "файл " + exeFile + " - не найден");
                 MySQL.SaveTo("events", "status", "-1", "id = '" + newevent.Id + "'");
                 return false;
             }

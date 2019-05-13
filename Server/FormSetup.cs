@@ -28,7 +28,8 @@ namespace SmartHome
             checkBoxPingToLog.Checked       = Program.PingLogEnable;
             checkBoxNooLiteToLog.Checked    = Program.NooLiteLogEnable;
             checkBoxMqttToLog.Checked       = Program.MqttLogEnable;
-    } // FormSetup()
+            checkBoxScriptsDebug.Checked    = Program.ScriptsDebug;
+        } // FormSetup()
 
 //===============================================================================================================
 // Name...........:	buttonSave_Click
@@ -77,11 +78,13 @@ namespace SmartHome
             Program.PingLogEnable = checkBoxPingToLog.Checked;
             Program.NooLiteLogEnable = checkBoxNooLiteToLog.Checked;
             Program.MqttLogEnable = checkBoxMqttToLog.Checked;
+            Program.ScriptsDebug = checkBoxScriptsDebug.Checked;
             IniFile.WriteString("App", "StartMinimized", Program.StartMinimized.ToString());
             IniFile.WriteString("Log", "Events", Program.EventsLogEnable.ToString());
             IniFile.WriteString("Log", "Ping", Program.PingLogEnable.ToString());
             IniFile.WriteString("Log", "nooLite", Program.NooLiteLogEnable.ToString());
             IniFile.WriteString("Log", "MQTT", Program.MqttLogEnable.ToString());
+            IniFile.WriteString("Log", "Scripts", Program.ScriptsDebug.ToString());
             Hide();
         } // void buttonSave_Click()
 

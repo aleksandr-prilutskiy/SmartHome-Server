@@ -62,7 +62,9 @@ namespace SmartHome
             }
             stopWatch.Stop();
             if (_busy) return;
-            _buffer.Add(DateTime.Now.ToString("dd.MM HH:mm:ss: ") + message);
+            if (message.Substring(0, 1) == "@")
+                message = DateTime.Now.ToString("dd.MM HH:mm:ss: ") + message.Substring(1);
+            _buffer.Add(message);
         } // void Add(message)
 
 //===============================================================================================================

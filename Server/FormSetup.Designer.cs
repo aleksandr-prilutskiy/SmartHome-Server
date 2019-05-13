@@ -47,6 +47,7 @@
             this.textBoxMySQLServerAddr = new System.Windows.Forms.TextBox();
             this.labelMySQLServerAddr = new System.Windows.Forms.Label();
             this.tabPageMQTT = new System.Windows.Forms.TabPage();
+            this.labelMQTTBrokerPortNote = new System.Windows.Forms.Label();
             this.textBoxMQTTBrokerPort = new System.Windows.Forms.TextBox();
             this.labelMQTTBrokerPort = new System.Windows.Forms.Label();
             this.labelMQTTBrokerPassword = new System.Windows.Forms.Label();
@@ -60,7 +61,7 @@
             this.checkBoxEventsToLog = new System.Windows.Forms.CheckBox();
             this.buttonSave = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
-            this.labelMQTTBrokerPortNote = new System.Windows.Forms.Label();
+            this.checkBoxScriptsDebug = new System.Windows.Forms.CheckBox();
             this.tabControlSetup.SuspendLayout();
             this.tabPageGeneral.SuspendLayout();
             this.tabPageMySQL.SuspendLayout();
@@ -70,7 +71,7 @@
             // 
             // checkBoxPingToLog
             // 
-            this.checkBoxPingToLog.Location = new System.Drawing.Point(15, 45);
+            this.checkBoxPingToLog.Location = new System.Drawing.Point(15, 40);
             this.checkBoxPingToLog.Name = "checkBoxPingToLog";
             this.checkBoxPingToLog.Size = new System.Drawing.Size(295, 17);
             this.checkBoxPingToLog.TabIndex = 1;
@@ -79,7 +80,7 @@
             // 
             // checkBoxMqttToLog
             // 
-            this.checkBoxMqttToLog.Location = new System.Drawing.Point(15, 95);
+            this.checkBoxMqttToLog.Location = new System.Drawing.Point(15, 90);
             this.checkBoxMqttToLog.Name = "checkBoxMqttToLog";
             this.checkBoxMqttToLog.Size = new System.Drawing.Size(295, 17);
             this.checkBoxMqttToLog.TabIndex = 2;
@@ -248,6 +249,15 @@
             this.tabPageMQTT.Text = "MQTT";
             this.tabPageMQTT.UseVisualStyleBackColor = true;
             // 
+            // labelMQTTBrokerPortNote
+            // 
+            this.labelMQTTBrokerPortNote.Location = new System.Drawing.Point(190, 39);
+            this.labelMQTTBrokerPortNote.Name = "labelMQTTBrokerPortNote";
+            this.labelMQTTBrokerPortNote.Size = new System.Drawing.Size(120, 15);
+            this.labelMQTTBrokerPortNote.TabIndex = 20;
+            this.labelMQTTBrokerPortNote.Text = "(по умолчанию = 1883)";
+            this.labelMQTTBrokerPortNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // textBoxMQTTBrokerPort
             // 
             this.textBoxMQTTBrokerPort.Location = new System.Drawing.Point(105, 36);
@@ -314,6 +324,7 @@
             // 
             // tabPageLog
             // 
+            this.tabPageLog.Controls.Add(this.checkBoxScriptsDebug);
             this.tabPageLog.Controls.Add(this.checkBoxNooLiteToLog);
             this.tabPageLog.Controls.Add(this.checkBoxEventsToLog);
             this.tabPageLog.Controls.Add(this.checkBoxPingToLog);
@@ -328,7 +339,7 @@
             // 
             // checkBoxNooLiteToLog
             // 
-            this.checkBoxNooLiteToLog.Location = new System.Drawing.Point(15, 70);
+            this.checkBoxNooLiteToLog.Location = new System.Drawing.Point(15, 65);
             this.checkBoxNooLiteToLog.Name = "checkBoxNooLiteToLog";
             this.checkBoxNooLiteToLog.Size = new System.Drawing.Size(295, 17);
             this.checkBoxNooLiteToLog.TabIndex = 4;
@@ -337,7 +348,7 @@
             // 
             // checkBoxEventsToLog
             // 
-            this.checkBoxEventsToLog.Location = new System.Drawing.Point(15, 20);
+            this.checkBoxEventsToLog.Location = new System.Drawing.Point(15, 15);
             this.checkBoxEventsToLog.Name = "checkBoxEventsToLog";
             this.checkBoxEventsToLog.Size = new System.Drawing.Size(295, 17);
             this.checkBoxEventsToLog.TabIndex = 3;
@@ -364,14 +375,14 @@
             this.buttonCancel.UseVisualStyleBackColor = true;
             this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
-            // labelMQTTBrokerPortNote
+            // checkBoxScriptsDebug
             // 
-            this.labelMQTTBrokerPortNote.Location = new System.Drawing.Point(190, 39);
-            this.labelMQTTBrokerPortNote.Name = "labelMQTTBrokerPortNote";
-            this.labelMQTTBrokerPortNote.Size = new System.Drawing.Size(120, 15);
-            this.labelMQTTBrokerPortNote.TabIndex = 20;
-            this.labelMQTTBrokerPortNote.Text = "(по умолчанию = 1883)";
-            this.labelMQTTBrokerPortNote.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.checkBoxScriptsDebug.Location = new System.Drawing.Point(15, 115);
+            this.checkBoxScriptsDebug.Name = "checkBoxScriptsDebug";
+            this.checkBoxScriptsDebug.Size = new System.Drawing.Size(295, 17);
+            this.checkBoxScriptsDebug.TabIndex = 5;
+            this.checkBoxScriptsDebug.Text = "Отладка выполнения скриптов";
+            this.checkBoxScriptsDebug.UseVisualStyleBackColor = true;
             // 
             // FormSetup
             // 
@@ -432,5 +443,6 @@
         private System.Windows.Forms.Label labelMQTTBrokerAddr;
         private System.Windows.Forms.Label labelMySQLServerPortNote;
         private System.Windows.Forms.Label labelMQTTBrokerPortNote;
+        private System.Windows.Forms.CheckBox checkBoxScriptsDebug;
     }
 }

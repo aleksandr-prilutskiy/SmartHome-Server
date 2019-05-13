@@ -42,7 +42,8 @@ namespace SmartHome
             Program.PingLogEnable     = ReadBool("Log", "Ping", false);
             Program.NooLiteLogEnable  = ReadBool("Log", "nooLite", false);
             Program.MqttLogEnable     = ReadBool("Log", "MQTT", false);
-    } // void ReadConfig()
+            Program.ScriptsDebug      = ReadBool("Log", "Scripts", false);
+        } // void ReadConfig()
 
 //===============================================================================================================
 // Name...........:	SaveConfig
