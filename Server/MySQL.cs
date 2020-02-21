@@ -232,6 +232,27 @@ namespace SmartHome
         } // void SaveTo(tablename, fields, data, where)
 
 //===============================================================================================================
+// Name...........:	Query
+// Description....:	Выполнение запроса к базе данных
+// Syntax.........:	Query(sql)
+// Parameters.....:	sql         - строка запроса в формате SQL
+//===============================================================================================================
+        public static void Query(string sql)
+        {
+            if (Connection == null) return;
+            MySqlCommand command = new MySqlCommand(sql, Connection);
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                LogFile.Add("@" + Resources.LogMsgError +
+                            "ошибка выполнения команды '" + sql + "'");
+            }
+        } // void Query(sql)
+
+//===============================================================================================================
 // Name...........:	Close
 // Description....:	Отключение от базы данных
 // Syntax.........:	Close()
